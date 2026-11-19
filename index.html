@@ -1,0 +1,791 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Monitor Energético España & Catalunya</title>
+<style>
+  :root {
+    --bg: #0b1220; --card: #121c2e; --card2: #0e1728;
+    --text: #e6edf7; --muted: #8fa0b8; --line: #22304d;
+    --green: #22c55e; --blue: #38bdf8; --amber: #f59e0b; --red: #ef4444;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: "Segoe UI", system-ui, -apple-system, sans-serif;
+    background: var(--bg); color: var(--text); padding: 24px 16px 48px;
+    line-height: 1.45;
+  }
+  header { max-width: 1100px; margin: 0 auto 20px; }
+  h1 { font-size: 1.5rem; font-weight: 700; }
+  h1 span { color: var(--green); }
+  .sub { color: var(--muted); font-size: .85rem; margin-top: 4px; }
+  .status { font-size: .8rem; color: var(--muted); margin-top: 8px; }
+  .status .dot { display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: var(--amber); margin-right: 6px; }
+  .wrap { max-width: 1100px; margin: 0 auto; display: grid; gap: 16px; }
+  .tiles { display: grid; grid-template-columns: repeat(auto-fit, minmax(230px, 1fr)); gap: 12px; }
+  .tile { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 14px 16px; }
+  .tile .label { font-size: .72rem; color: var(--muted); text-transform: uppercase; letter-spacing: .05em; margin-bottom: 4px; }
+  .tile .val { font-size: 1.35rem; font-weight: 700; }
+  .tile .val small { font-size: .8rem; font-weight: 400; color: var(--muted); }
+  .tile .meta { font-size: .72rem; color: var(--muted); margin-top: 5px; }
+  .tile .minibar { height: 6px; background: var(--card2); border: 1px solid var(--line); border-radius: 4px; margin-top: 7px; overflow: hidden; }
+  .tile .minibar div { height: 100%; background: linear-gradient(90deg, #16a34a, #22c55e); }
+  .tile.acc .val { color: var(--green); }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 16px 18px; }
+  .card h2 { font-size: .95rem; font-weight: 600; margin-bottom: 2px; }
+  .card .hint { font-size: .75rem; color: var(--muted); margin-bottom: 12px; }
+  svg text { font-family: inherit; }
+  .legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: .75rem; color: var(--muted); margin-top: 10px; }
+  .legend span::before { content: ""; display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+  footer { max-width: 1100px; margin: 28px auto 0; font-size: .75rem; color: var(--muted); }
+  footer a { color: var(--blue); text-decoration: none; }
+  .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 800px) { .grid2 { grid-template-columns: 1fr; } }
+  table { width: 100%; border-collapse: collapse; font-size: .82rem; }
+  th, td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--line); }
+  th:first-child, td:first-child { text-align: left; color: var(--muted); font-weight: 500; }
+  .foot-note { font-size: .7rem; color: var(--muted); margin-top: 8px; }
+  .yr-line { stroke: #fbbf24; stroke-width: 3; fill: none; }
+  .chart-title { font-size: .85rem; color: var(--muted); margin-bottom: 8px; }
+  .mix-row { display: grid; grid-template-columns: 130px 1fr 52px; gap: 8px; align-items: center; margin: 7px 0; font-size: .8rem; }
+  .mix-row .name { color: var(--muted); }
+  .mix-row .bar { height: 16px; background: var(--card2); border: 1px solid var(--line); border-radius: 5px; overflow: hidden; }
+  .mix-row .bar div { height: 100%; border-radius: 4px; }
+  .mix-row .val { text-align: right; font-weight: 600; }
+  .mix3 { display: grid; grid-template-columns: 150px 1fr 215px; column-gap: 10px; margin: 12px 0 16px; font-size: .8rem; align-items: center; }
+  .mix3 .name { grid-row: 1 / 4; grid-column: 1; color: var(--muted); padding-right: 4px; }
+  .mix3 .track { grid-column: 2; height: 13px; background: var(--card2); border: 1px solid var(--line); border-radius: 4px; overflow: hidden; margin-top: 4px; }
+  .mix3 .track > div { height: 100%; border-radius: 4px; }
+  .mix3 .val { grid-column: 3; text-align: right; margin-top: 4px; line-height: 1.3; }
+  .mix3 .val.dim { font-weight: 400; font-size: .72rem; color: var(--muted); }
+  .mix3 .val b { font-weight: 700; }
+  .tabs { display: flex; gap: 8px; margin-bottom: 12px; flex-wrap: wrap; }
+  .tabs button {
+    background: var(--card2); color: var(--muted); border: 1px solid var(--line);
+    border-radius: 8px; padding: 6px 14px; font-size: .8rem; cursor: pointer; font-family: inherit;
+  }
+  .tabs button.active { background: #16a34a; color: #fff; border-color: #16a34a; font-weight: 600; }
+  .combo-wrap { position: relative; }
+  .combo-tip {
+    position: absolute; pointer-events: none; background: #0a101c; border: 1px solid var(--line);
+    border-radius: 8px; padding: 8px 10px; font-size: .75rem; z-index: 5; display: none; min-width: 180px;
+    box-shadow: 0 4px 14px rgba(0,0,0,.5);
+  }
+  .combo-tip .t-title { font-weight: 600; margin-bottom: 4px; color: var(--text); }
+  .combo-tip .row { display: flex; align-items: center; gap: 6px; margin: 2px 0; color: var(--muted); }
+  .combo-tip .row .sw { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
+  .combo-tip .tech .sw { width: 8px; height: 8px; border-radius: 2px; display: inline-block; }
+  .deploy-row { margin: 14px 0; }
+  .deploy-row .t { display: flex; justify-content: space-between; font-size: .82rem; margin-bottom: 4px; }
+  .deploy-row .t b { font-weight: 600; }
+  .deploy-row .t .cur { color: var(--green); font-weight: 600; }
+  .deploy-row .bar { position: relative; height: 14px; background: var(--card2); border: 1px solid var(--line); border-radius: 7px; overflow: hidden; }
+  .deploy-row .fill { position: absolute; inset: 0 auto 0 0; background: linear-gradient(90deg, #16a34a, #22c55e); border-radius: 7px; }
+  .geo-tabs { display: flex; gap: 10px; margin-top: 16px; }
+  .geo-tabs button {
+    background: var(--card2); color: var(--muted); border: 1px solid var(--line);
+    border-radius: 10px; padding: 10px 24px; font-size: 1rem; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+  }
+  .geo-tabs button.active { background: #16a34a; color: #fff; border-color: #16a34a; }
+  .combo-tip { max-width: 320px; }
+  .combo-tip .tech { display: grid; grid-template-columns: 12px 1fr auto; gap: 6px; align-items: center; margin: 2px 0; color: var(--muted); }
+  .combo-tip .tech b { color: var(--text); font-weight: 600; }
+</style>
+</head>
+<body>
+<header>
+  <h1>Monitor Energético <span>España</span> &amp; Catalunya</h1>
+  <div class="sub">Cuota renovable por día (último mes) y por mes desde 2015 · Cómo se genera la electricidad: nuclear, carbón, gas, solar, eólica… · Despliegue frente a objetivos 2030 · Vehículos hacia 2035 · Fuentes: Red Eléctrica (apidatos), REE, MITECO/PNIEC, Generalitat, ANFAC/ACEA</div>
+  <div class="status"><span class="dot" id="status-dot"></span><span id="status-text">Cargando datos (corte: ayer)…</span></div>
+  <div class="geo-tabs">
+    <button id="geo-es" class="active">🇪🇸 España</button>
+    <button id="geo-cat">Catalunya</button>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="tiles" data-geo="es">
+    <div class="tile acc">
+      <div class="label">Renovables España, último mes</div>
+      <div class="val" id="tile-ren-es">– <small>%</small></div>
+      <div class="meta">media de los últimos 30 días (REE, valores diarios)</div>
+    </div>
+    <div class="tile">
+      <div class="label">Solar España</div>
+      <div class="val">41 GW <small>/ 76,3 GW meta 2030 (PNIEC)</small></div>
+      <div class="meta">≈ 49,5 GW con autoconsumo · 54 % del objetivo</div>
+      <div class="minibar"><div style="width:54%"></div></div>
+    </div>
+    <div class="tile">
+      <div class="label">Eólica España</div>
+      <div class="val">33,3 GW <small>/ 62 GW meta 2030</small></div>
+      <div class="meta">54 % del objetivo · 3 GW marina aún sin desplegar</div>
+      <div class="minibar"><div style="width:54%"></div></div>
+    </div>
+    <div class="tile">
+      <div class="label">Baterías España</div>
+      <div class="val">96 MW <small>/ 18,5 GW meta 2030</small></div>
+      <div class="meta">+11 GW con permiso concedido · gran asignatura pendiente</div>
+      <div class="minibar"><div style="width:1.5%"></div></div>
+    </div>
+    <div class="tile acc">
+      <div class="label">Enchufables España, octubre</div>
+      <div class="val">31,5 %</div>
+      <div class="meta">de los turismos nuevos (BEV + PHEV) · media ene–oct: 24,6 %</div>
+      <div class="minibar"><div style="width:31.5%"></div></div>
+    </div>
+    <div class="tile">
+      <div class="label">Gasolina + diésel España, sept</div>
+      <div class="val">18,7 %</div>
+      <div class="meta">cuota de turismos nuevos de combustión pura, mín. histórico</div>
+      <div class="minibar"><div style="width:18.7%;background:linear-gradient(90deg,#b45309,#f59e0b)"></div></div>
+    </div>
+  </section>
+
+  <section class="tiles" data-geo="cat" style="display:none">
+    <div class="tile acc">
+      <div class="label">Renovables Catalunya, último mes</div>
+      <div class="val" id="tile-ren-cat">– <small>%</small></div>
+      <div class="meta">media de los últimos 30 días (REE, CCAA Catalunya)</div>
+    </div>
+    <div class="tile">
+      <div class="label">Solar Catalunya</div>
+      <div class="val">0,52 GW <small>/ 7 GW meta 2030 (PROENCAT)</small></div>
+      <div class="meta">521 MW en servicio (1er sem. 2026) · techos al 45 % de su meta, suelo al 8 %</div>
+      <div class="minibar"><div style="width:7.4%"></div></div>
+    </div>
+    <div class="tile">
+      <div class="label">Eólica Catalunya</div>
+      <div class="val">1,33 GW <small>/ 5 GW meta 2030</small></div>
+      <div class="meta">≈ 26 % de cumplimiento del objetivo de la Generalitat</div>
+      <div class="minibar"><div style="width:26.6%"></div></div>
+    </div>
+    <div class="tile">
+      <div class="label">Baterías Catalunya</div>
+      <div class="val">63 MW <small>/ 1,6 GW meta 2030</small></div>
+      <div class="meta">+2.300 MW con permiso: el mayor parque de proyectos de España</div>
+      <div class="minibar"><div style="width:3.9%"></div></div>
+    </div>
+    <div class="tile acc">
+      <div class="label">Enchufables Catalunya, agosto</div>
+      <div class="val">32,4 %</div>
+      <div class="meta">récord mensual de turismos electrificados (BEV + PHEV)</div>
+      <div class="minibar"><div style="width:32.4%"></div></div>
+    </div>
+  </section>
+
+  <section class="grid2" data-geo="es">
+    <div class="card">
+      <h2>Así avanza el despliegue solar</h2>
+      <div class="hint">Incorporación anual de potencia solar fotovoltaica en España (GW) y objetivo medio anual del PNIEC 2023–2030 (≈ 7 GW/año para pasar de 41 a 76,3 GW).</div>
+      <div id="chart-solar"></div>
+    </div>
+    <div class="card">
+      <h2>Así avanza el despliegue eólico</h2>
+      <div class="hint">Incorporación anual de potencia eólica en España (GW) y objetivo medio anual del PNIEC 2023–2030 (≈ 5,7 GW/año para pasar de 33,3 a 62 GW).</div>
+      <div id="chart-wind"></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Cuota renovable · <span id="combo-geo-title">España</span></h2>
+    <div class="hint">Pasa el ratón sobre la curva para consultar cualquier día o mes: cuota renovable y, con el desglose completo, la generación por tecnología (nuclear, carbón, gas, eólica, solar, hidráulica, otras). Datos: REE (apidatos), corte al día de ayer.</div>
+    <div class="tabs">
+      <button id="tab-30" class="active">Últimos 30 días (día)</button>
+      <button id="tab-2020">Desde 2020 (mes)</button>
+      <button id="tab-2015">Desde 2015 (mes)</button>
+    </div>
+    <div class="combo-wrap">
+      <div id="chart-combo"></div>
+      <div class="combo-tip" id="combo-tip"></div>
+    </div>
+    <div class="legend" id="combo-leg">
+      <span><span style="display:inline-block;width:10px;height:10px;background:#22c55e;border-radius:3px;margin-right:5px"></span>España (renovable)</span>
+      <span><span style="display:inline-block;width:10px;height:10px;background:#334155;border-radius:3px;margin-right:5px"></span>no renovable</span>
+    </div>
+    <p class="foot-note">El desglose por tecnología del tooltip procede del balance eléctrico de REE por comunidad autónoma. Si algún punto no trae desglose (p. ej. parte del histórico), se muestra solo renovable/no renovable y la generación total.</p>
+  </section>
+
+  <section class="card">
+    <h2>Cómo se genera la electricidad: carbón, nuclear, gas, solar…</h2>
+    <div class="hint">Estructura de la generación eléctrica por tecnología en el año en curso, hasta el último mes cerrado (hoy octubre; pasará a noviembre el 1 de diciembre), comparada con el mismo periodo del año pasado y con el año 2025 completo. Datos: balance eléctrico mensual de REE (España y CCAA Catalunya).</div>
+    <div class="grid2" id="mix-grid">
+      <div data-geo="es">
+        <div class="chart-title" id="mix-es-period">España</div>
+        <div id="mix-es"></div>
+      </div>
+      <div data-geo="cat">
+        <div class="chart-title" id="mix-cat-period">Catalunya</div>
+        <div id="mix-cat"></div>
+      </div>
+    </div>
+    <p class="foot-note">Barra de color pleno: año en curso hasta el último mes cerrado. Debajo, en color cada vez más atenuado pero reconocible, el mismo periodo del año anterior y el año anterior completo (ene–dic). El bombeo se cuenta dentro de la hidráulica; la cogeneración y los residuos, en «cogeneración + residuos». Calculado a partir del balance eléctrico mensual de REE, así que varía ligeramente respecto a los informes anuales.</p>
+  </section>
+
+  <section class="grid2">
+    <div class="card" data-geo="es">
+      <h2>Despliegue España frente al PNIEC 2030</h2>
+      <div class="hint">Potencia instalada (cierre 2025, REE) frente a metas del PNIEC 2023–2030.</div>
+      <div class="deploy-row" data-label="Solar fotovoltaica" data-current="41.0" data-goal="76.3" data-unit="GW" data-note="≈ 49,5 GW con autoconsumo; ~2/3 del objetivo. Récord 2025: +8,8 GW."></div>
+      <div class="deploy-row" data-label="Eólica" data-current="33.3" data-goal="62.0" data-unit="GW" data-note="Incluye 3 GW de eólica marina, aún sin desplegar."></div>
+      <div class="deploy-row" data-label="Baterías" data-current="0.096" data-goal="4.5" data-unit="GW" data-note="Solo 96 MW instalados (2025), aunque con 11 GW de permisos; con bombeo reversible el almacenamiento total (meta 22,5 GW) llega a 3,4 GW."></div>
+    </div>
+    <div class="card" data-geo="cat">
+      <h2>Despliegue Catalunya frente a PROENCAT 2050</h2>
+      <div class="hint">Potencia instalada (2026) frente a metas de la Generalitat para 2030: 12.000 MW renovables (7.000 solares + 5.000 eólicos), 54 % de demanda renovable.</div>
+      <div class="deploy-row" data-label="Solar fotovoltaica" data-current="0.52" data-goal="7.0" data-unit="GW" data-note="521 MW en servicio (1er semestre 2026); techos al 45 % de su meta, suelo al 8 %."></div>
+      <div class="deploy-row" data-label="Eólica terrestre" data-current="1.33" data-goal="5.0" data-unit="GW" data-note="≈ 26 % de cumplimiento del objetivo 2030."></div>
+      <div class="deploy-row" data-label="Baterías" data-current="0.063" data-goal="1.6" data-unit="GW" data-note="63 MW instalados (líder estatal), con más de 2.300 MW con permiso: el mayor parque de proyectos de España."></div>
+    </div>
+  </section>
+
+  <section class="card">
+    <h2>Recarga: red en servicio, tipos de cargador y objetivos</h2>
+    <div class="hint">Ejecución frente a objetivos de la red pública de recarga por tipo de cargador: MCS (megavatio, para camiones), CCS/carga rápida y lenta AC. Datos: Barómetro de Electromovilidad ANFAC (3T 2026), Registro de la Dirección General de Transporte, Marco de Acción Nacional (AFIR) y Plan de Impulso del Vehículo Eléctrico de la Generalitat 2025–2030.</div>
+    <div class="grid2" id="charge-grid">
+      <div data-geo="es">
+        <div class="chart-title">España · red pública (3T 2026)</div>
+        <div class="deploy-row" data-label="Potencia pública instalada (objetivo 2026)" data-current="70" data-goal="100" data-unit="% del objetivo" data-note="España ya ha alcanzado el 70 % del objetivo de potencia instalada para 2026; superado en 22 provincias, y en 10 ni siquiera llega al 50 %."></div>
+        <div class="deploy-row" data-label="Puntos en servicio / instalados" data-current="58075" data-goal="76040" data-unit="puntos" data-note="17.965 puntos ya instalados siguen fuera de servicio (23,6 % del total): la conexión a la red de distribución es el principal cuello de botella."></div>
+        <div style="height:10px"></div>
+        <div class="chart-title">Reparto por tipo (aprox.)</div>
+        <div class="mix-row"><span class="name">Carga lenta AC (≤22 kW)</span><div class="bar"><div style="width:85%;background:#64748b"></div></div><span class="val">≈ 85 %</span></div>
+        <div class="mix-row"><span class="name">Carga rápida DC 50–249 kW (CCS)</span><div class="bar"><div style="width:10%;background:#38bdf8"></div></div><span class="val">≈ 10 %</span></div>
+        <div class="mix-row"><span class="name">Ultrarrápida HPC ≥250 kW (CCS)</span><div class="bar"><div style="width:5%;background:#fbbf24"></div></div><span class="val">≈ 5 %</span></div>
+        <div class="mix-row"><span class="name">MCS ≥1 MW (camiones)</span><div class="bar"><div style="width:0.5%;background:#ef4444"></div></div><span class="val">pilotos</span></div>
+      </div>
+      <div data-geo="cat">
+        <div class="chart-title">Catalunya · red pública (3T 2026)</div>
+        <div class="deploy-row" data-label="Puntos públicos en servicio" data-current="12197" data-goal="58075" data-unit="puntos" data-note="Catalunya lidera España: 12.197 puntos operativos (+257 en el trimestre), ≈ 21 % de toda la red estatal."></div>
+        <div class="deploy-row" data-label="Nuevos puntos de titularidad pública" data-current="0" data-goal="9000" data-unit="puntos" data-note="Meta del Plan de Impulso del Vehículo Eléctrico 2025–2030 de la Generalitat: 9.000 nuevos puntos de recarga públicos; los despliegues en curso aún no se han computado como ejecutados en el indicador oficial."></div>
+        <div style="height:10px"></div>
+        <div class="chart-title">Objetivos regulatorios</div>
+        <div class="mix-row"><span class="name">AFIR · potencia por VE</span><div class="bar"><div style="width:33%;background:#38bdf8"></div></div><span class="val">1,3 kW/BEV</span></div>
+        <div class="mix-row"><span class="name">AFIR · corredores TEN-T</span><div class="bar"><div style="width:67%;background:#22c55e"></div></div><span class="val">cada 60 km</span></div>
+        <div class="mix-row"><span class="name">MCS ≥1 MW (camiones)</span><div class="bar"><div style="width:0.5%;background:#ef4444"></div></div><span class="val">pilotos</span></div>
+      </div>
+    </div>
+    <p class="foot-note">El objetivo estatal ya no se mide en número de puntos sino en potencia: el Marco de Acción Nacional (AFIR) prevé 2,27 GW de recarga pública en 2030. El reparto por tipos (AC/CCS/HPC) es aproximado, calculado a partir del Barómetro ANFAC: los cargadores de ≥250 kW suponen ≈ 5 % de la red pública y concentraron el 90 % de la alta potencia añadida en 2025 (337 puntos ≥250 kW solo en el 1er semestre de 2026); la tecnología MCS (≥1 MW para camiones) aún no tiene despliegue comercial, solo estaciones piloto. La Generalitat no publica aún el desglose por tipo para Catalunya.</p>
+  </section>
+
+  <section class="card" data-geo="es">
+    <h2>Los combustibles pierden cuota</h2>
+    <div class="hint">Cuota de cada tipo de propulsión en los turismos nuevos de España. En 2035 solo se podrán vender coches de cero emisiones: gasolina, diésel y también los híbridos enchufables desaparecerán como venta nueva.</div>
+    <div class="combo-wrap"><div id="chart-cars-share"></div><div class="combo-tip" id="cars-tip"></div></div>
+    <p class="foot-note">Cuotas de turismos nuevos (España). Serie 2020–2024 publicada (gasolina 49,8→37,2 %; diésel 27,7→9,5 %; BEV 2,1→5,6 %; PHEV 2,7→5,8 %; GLP/GNC 1,5→3,3 %), según ANFAC y balance anual de mercado. 2025*: gasolina e híbridos no enchufables estimados (electrificados: 19,6 % publicado, BEV 8,8 / PHEV 10,8). 2026**: dato de septiembre (electrificados ≈ 33 %: BEV 18,8, PHEV ≈ 14,2; gasolina 16,2 y diésel 2,5). «Resto» (banda gris oscura hasta el 100 %) = GLP/GNC, hidrógeno y otros: siempre suma la cuota completa hasta el 100 %. Pasa el ratón sobre cada banda para ver los valores año a año.</p>
+  </section>
+
+  <section class="card">
+    <h2>Camino a 2035: fin de gasolina y diésel</h2>
+    <div class="hint">Cuota de coches enchufables (BEV + PHEV) frente al objetivo de la UE: desde 2035 los coches nuevos tendrán que ser de cero emisiones (100 % de reducción de CO₂), es decir, sin gasolina, diésel ni PHEV nuevos. Línea discontinua: senda necesaria (~8–9 puntos al año) hasta el 100 % en 2035.</div>
+    <div id="chart-2035"></div>
+    <p class="foot-note">Puntos 2026: España – ene–feb 21,2 %, mayo 23,1 %, junio 23,2 %, agosto 27,7 %, sept ~33 %, octubre 31,5 % (BEV oct: 16.425 uds; PHEV: 14.619 uds). Catalunya – junio 28,1 %, julio 28,9 %, agosto 32,4 %. A este ritmo (≈ +8 pp/año) se llegaría al 100 % hacia 2035, aunque el PHEV también desaparecerá como venta nueva.</p>
+  </section>
+</main>
+
+<footer>
+  <p><strong>Fuentes:</strong> Red Eléctrica de España, API abierta <a href="https://www.ree.es/es/datos/apidatos">apidatos.ree.es</a> (balance eléctrico España y CCAA Catalunya, con corte al día de ayer); <a href="https://www.sistemaelectrico-ree.es/es/informe-del-sistema-electrico/potencia-instalada">REE, Informe del Sistema Eléctrico 2024 y 2025</a> (incorporación anual de potencia); <a href="https://www.miteco.gob.es/content/dam/miteco/es/energia/files-1/pniec-2023-2030/PNIEC_2024_240924.pdf">PNIEC 2023–2030 (MITECO)</a>; <a href="https://govern.cat/gov/notes-premsa/515283/government-approves-roadmap-for-catalonia-s-energy-transition-until-2050">PROENCAT 2050</a> y PLATER (Catalunya); <a href="https://anfac.com/matriculaciones-vehiculos-electrificados/">ANFAC</a> y ACEA (vehículos). Objetivos España 2030: 76,3 GW fotovoltaica, 62 GW eólica, 22,5 GW almacenamiento y 81 % de generación renovable. Objetivos Catalunya 2030: 12.000 MW renovables y 54 % de demanda renovable (62.000 MW en 2050, PLATER).</p>
+  <p><strong>Cómo se actualiza:</strong> la página consulta al abrirla los datos con corte al día de ayer (y se refresca cada 15 minutos), por lo que está siempre al día sin servidor y sin depender de datos «en directo». En esta vista previa el acceso a la red puede estar bloqueado: entonces se muestran datos de ejemplo. El archivo descargado, o publicado en GitHub Pages, carga datos reales.</p>
+</footer>
+
+<script>
+(function () {
+  "use strict";
+  const API = "https://apidatos.ree.es/es";
+  const CAT = "geo_limit=ccaa&geo_id=9";
+  const DAY = new Intl.DateTimeFormat("sv-SE", { timeZone: "Europe/Madrid" });
+  const now = new Date();
+  const todayStr = DAY.format(now);
+  const yest = new Date(now.getTime() - 24 * 3600 * 1000);
+  const yestStr = DAY.format(yest);                    // YYYY-MM-DD de ayer (hora Madrid)
+  const yMonth = yestStr.slice(0, 7);
+  const qsLast30 = (cat) => {
+    const s30 = DAY.format(new Date(yest.getTime() - 29 * 24 * 3600 * 1000));
+    return `start_date=${s30}T00:00&end_date=${yestStr}T23:59&time_trunc=day${cat ? "&" + CAT : ""}`;
+  };
+  const qsYears = (cat) => `start_date=2015-01-01T00:00&end_date=${yestStr}T23:59&time_trunc=month${cat ? "&" + CAT : ""}`;
+  const fmtD = t => t.slice(8, 10) + " " + ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"][+t.slice(5, 7) - 1];
+
+  // ================= Pestañas de territorio (España / Catalunya) =================
+  let pageGeo = "es";
+  function fixGrids() {
+    document.querySelectorAll(".grid2").forEach(g => {
+      const vis = [...g.children].filter(k => k.style.display !== "none" && !k.hidden);
+      g.style.gridTemplateColumns = vis.length > 1 ? "" : "1fr";
+    });
+  }
+  function setGeo(geo) {
+    pageGeo = geo;
+    document.getElementById("geo-es").classList.toggle("active", geo === "es");
+    document.getElementById("geo-cat").classList.toggle("active", geo === "cat");
+    document.querySelectorAll("[data-geo]").forEach(n => {
+      n.style.display = (n.dataset.geo === geo) ? "" : "none";
+    });
+    document.getElementById("combo-geo-title").textContent = geo === "es" ? "España" : "Catalunya";
+    const col = geo === "es" ? "#22c55e" : "#38bdf8";
+    document.getElementById("combo-leg").innerHTML =
+      `<span><span style="display:inline-block;width:10px;height:10px;background:${col};border-radius:3px;margin-right:5px"></span>${geo === "es" ? "España" : "Catalunya"} (renovable)</span>` +
+      `<span><span style="display:inline-block;width:10px;height:10px;background:#334155;border-radius:3px;margin-right:5px"></span>no renovable</span>`;
+    fixGrids();
+    renderCombo();
+  }
+  document.getElementById("geo-es").onclick = () => setGeo("es");
+  document.getElementById("geo-cat").onclick = () => setGeo("cat");
+
+  // ================= Despliegue (barras horizontales) =================
+  document.querySelectorAll(".deploy-row").forEach(row => {
+    const d = row.dataset;
+    const pct = Math.min(100, (parseFloat(d.current) / parseFloat(d.goal)) * 100);
+    row.innerHTML = `
+      <div class="t"><b>${d.label}</b><span><span class="cur">${parseFloat(d.current).toLocaleString("es-ES")} ${d.unit}</span> / meta ${parseFloat(d.goal).toLocaleString("es-ES")} ${d.unit} · ${pct.toFixed(0)} %</span></div>
+      <div class="bar"><div class="fill" style="width:${pct}%"></div></div>
+      <div class="foot-note">${d.note}</div>`;
+  });
+
+  // ================= Zubau solar / eólica (barras con objetivo) =================
+  function zubauChart(el, data, target, goalLabel) {
+    const W = 1000, H = 270, P = { t: 18, r: 15, b: 30, l: 44 };
+    const years = data.map(d => d[0]).concat(2026, 2027, 2028, 2029, 2030);
+    const mx = Math.max(target, ...data.map(d => d[1])) * 1.15;
+    const X = yr => P.l + (yr - years[0]) / (2030 - years[0]) * (W - P.l - P.r);
+    const Y = v => P.t + (1 - v / mx) * (H - P.t - P.b);
+    const bw = Math.max(X(2021) - X(2020) - 4, 6);
+    let g = `<line x1="${P.l}" x2="${W - P.r}" y1="${Y(target)}" y2="${Y(target)}" stroke="#f59e0b" stroke-dasharray="5 5"/>
+      <text x="${W - P.r}" y="${Y(target) - 6}" fill="#f59e0b" font-size="11" text-anchor="end">${goalLabel}</text>`;
+    for (let k = 0; k <= 4; k++) {
+      const v = mx * k / 4, y = Y(v);
+      g += `<line x1="${P.l}" x2="${W - P.r}" y1="${y}" y2="${y}" stroke="#22304d"/>
+            <text x="${P.l - 6}" y="${y + 4}" fill="#8fa0b8" font-size="11" text-anchor="end">${v.toFixed(0)}</text>`;
+    }
+    let bars = "";
+    data.forEach(d => {
+      bars += `<rect x="${X(d[0]) - bw / 2}" y="${Y(d[1])}" width="${bw}" height="${Y(0) - Y(d[1])}" rx="3" fill="#fbbf24"><title>${d[0]}: ${d[1]} GW</title></rect>`;
+    });
+    for (let yr = 2026; yr <= 2030; yr++) {
+      bars += `<rect x="${X(yr) - bw / 2}" y="${Y(target) * 0 + Y(target)}" width="${bw}" height="${Y(0) - Y(target)}" rx="3" fill="none" stroke="#f59e0b" stroke-dasharray="4 3"><title>Objetivo medio ${yr}: ${target} GW</title></rect>`;
+    }
+    let labels = "";
+    years.filter((v, i, a) => a.indexOf(v) === i).forEach(yr => {
+      labels += `<text x="${X(yr)}" y="${H - 10}" fill="#8fa0b8" font-size="11" text-anchor="middle">${yr}</text>`;
+    });
+    el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">${g}${bars}${labels}</svg>
+      <div class="legend"><span><span style="display:inline-block;width:10px;height:10px;background:#fbbf24;border-radius:3px;margin-right:5px"></span>incorporado</span> · <span><span style="display:inline-block;width:10px;height:10px;border:1.5px dashed #f59e0b;border-radius:3px;margin-right:5px"></span>objetivo anual PNIEC</span></div>`;
+  }
+  // Incorporación anual en GW (REE, informes del sistema; años previos a 2024 estimados por diferencia de potencia instalada)
+  zubauChart(document.getElementById("chart-solar"),
+    [[2019, 3.9], [2020, 2.9], [2021, 1.9], [2022, 3.9], [2023, 5.6], [2024, 6.0], [2025, 8.8]], 7, "≈ 7 GW/año (PNIEC)");
+  zubauChart(document.getElementById("chart-wind"),
+    [[2020, 1.7], [2021, 0.8], [2022, 1.4], [2023, 0.7], [2024, 1.3], [2025, 1.2]], 5.7, "≈ 5,7 GW/año (PNIEC)");
+
+  // ================= Cuota combustibles (área apilada) =================
+  (function carShare() {
+    const yrs = [2020, 2021, 2022, 2023, 2024, 2025, 2026];
+    // Serie histórica ANFAC (turismos): gasolina, diésel, BEV y PHEV publicadas; HEV y «resto»
+    // se desprenden del total. 2025: año (aprox. gasolina/HEV); 2026: dato de septiembre.
+    const bands = [
+      { n: "gasolina", c: "#b91c1c", v: [49.8, 45.1, 41.9, 40.8, 37.2, 30.0, 16.2] },
+      { n: "diésel", c: "#7f1d1d", v: [27.7, 19.9, 17.2, 12.5, 9.5, 6.5, 2.5] },
+      { n: "híbridos no enchufables", c: "#475569", v: [16.2, 25.6, 29.4, 31.9, 38.6, 40.0, 44.3] },
+      { n: "híbridos enchufables (PHEV)", c: "#14b8a6", v: [2.7, 5.0, 5.9, 6.6, 5.8, 10.8, 14.2] },
+      { n: "eléctricos (BEV)", c: "#0ea5e9", v: [2.1, 2.8, 3.8, 5.4, 5.6, 8.8, 18.8] }
+    ];
+    const resto = yrs.map((_, i) => Math.max(0, 100 - bands.reduce((s, b) => s + b.v[i], 0)));
+    const W = 1000, H = 300, P = { t: 14, r: 15, b: 30, l: 40 };
+    const X = i => P.l + i / (yrs.length - 1) * (W - P.l - P.r);
+    const Y = v => P.t + (1 - v / 100) * (H - P.t - P.b);
+    // Apilado desde abajo: resto → BEV → PHEV → HEV → diésel → gasolina
+    const order = [...bands].reverse();
+    const botCum = resto.map((r, i) => r);
+    let polys = "";
+    order.forEach((b, bi) => {
+      const bot = [...botCum];
+      const top = bot.map((v, i) => v + b.v[i]);
+      const pts = top.map((v, i) => `${X(i)},${Y(v)}`).join(" ") + " " + top.map((v, i) => `${X(i)},${Y(bot[i])}`).reverse().join(" ");
+      const titles = yrs.map((yr, i) => `${yr}: ${b.n} ${b.v[i].toLocaleString("es-ES")} %`).join(" · ");
+      polys += `<polygon points="${pts}" fill="${b.c}"><title>${titles}</title></polygon>`;
+      for (let i = 0; i < top.length; i++) botCum[i] = top[i];
+    });
+    const rPts = resto.map((v, i) => `${X(i)},${Y(v)}`).join(" ");
+    let g = "";
+    for (let k = 0; k <= 4; k++) {
+      g += `<line x1="${P.l}" x2="${W - P.r}" y1="${Y(k * 25)}" y2="${Y(k * 25)}" stroke="#22304d"/>
+            <text x="${P.l - 6}" y="${Y(k * 25) + 4}" fill="#8fa0b8" font-size="11" text-anchor="end">${k * 25}%</text>`;
+    }
+    let labels = "";
+    yrs.forEach((yr, i) => { labels += `<text x="${X(i)}" y="${H - 10}" fill="#8fa0b8" font-size="11" text-anchor="middle">${yr}${yr === 2025 ? "*" : yr === 2026 ? "**" : ""}</text>`; });
+    const MONTHLY_2026 = [["ene–feb", 21.2], ["mar", null], ["abr", null], ["may", 23.1], ["jun", 23.2], ["jul", null], ["ago", 27.7], ["sep", 33], ["oct", 31.5], ["nov", null], ["dic", null]];
+    document.getElementById("chart-cars-share").innerHTML = `<svg id="cars-svg" viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${g}${polys}
+      <polygon points="${rPts} ${X(yrs.length - 1)},${Y(0)} ${X(0)},${Y(0)}" fill="#1a2740"><title>${yrs.map((yr, i) => `${yr}: resto ${resto[i].toLocaleString("es-ES")} %`).join(" · ")}</title></polygon>
+      <line id="cars-xhair" x1="0" x2="0" y1="${P.t}" y2="${H - P.b}" stroke="#e6edf7" stroke-dasharray="3 3" visibility="hidden"/>
+      <line x1="${X(5.98)}" x2="${X(5.98)}" y1="${P.t}" y2="${H - P.b}" stroke="#ef4444" stroke-dasharray="4 4"/><text x="${X(4.7)}" y="${P.t + 12}" fill="#ef4444" font-size="10">2026**: dato de septiembre</text>
+      <rect id="cars-ov" x="${P.l}" y="${P.t}" width="${W - P.l - P.r}" height="${H - P.t - P.b}" fill="transparent"/>${labels}</svg>
+      <div class="legend">
+        <span><span style="display:inline-block;width:10px;height:10px;background:#b91c1c;border-radius:3px;margin-right:5px"></span>gasolina</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#7f1d1d;border-radius:3px;margin-right:5px"></span>diésel</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#475569;border-radius:3px;margin-right:5px"></span>híbridos no enchufables</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#14b8a6;border-radius:3px;margin-right:5px"></span>híbridos enchufables (PHEV)</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#0ea5e9;border-radius:3px;margin-right:5px"></span>eléctricos (BEV)</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#1a2740;border-radius:3px;margin-right:5px"></span>resto (gases GLP/GNC, FCEV, otros)</span></div>`;
+    // Hover: cuota de cada propulsión en el año señalado (+ mensual 2026 de enchufables)
+    const el = document.getElementById("chart-cars-share");
+    const tip = document.getElementById("cars-tip");
+    const svg = document.getElementById("cars-svg");
+    const ov = document.getElementById("cars-ov");
+    const xh = document.getElementById("cars-xhair");
+    const BANDS = [{ n: "gasolina", c: "#b91c1c" }, { n: "diésel", c: "#7f1d1d" }, { n: "híbridos no enchufables", c: "#475569" }, { n: "PHEV", c: "#14b8a6" }, { n: "BEV", c: "#0ea5e9" }, { n: "resto (gases…)", c: "#1a2740" }];
+    const valsOf = i => [...bands.map(b => b.v[i]), resto[i]];
+    function move(ev) {
+      const rect = svg.getBoundingClientRect();
+      const px = ((ev.clientX - rect.left) / rect.width) * W;
+      const i = Math.max(0, Math.min(yrs.length - 1, Math.round((px - P.l) / (W - P.l - P.r) * (yrs.length - 1))));
+      const x = X(i);
+      xh.setAttribute("x1", x); xh.setAttribute("x2", x); xh.setAttribute("visibility", "visible");
+      const vs = valsOf(i);
+      let rows = "";
+      BANDS.forEach((b, bi) => {
+        rows += `<div class="tech"><span class="sw" style="background:${b.c}"></span>${b.n}<b>${vs[bi].toLocaleString("es-ES")} %</b></div>`;
+      });
+      const enc = vs[3] + vs[4];
+      rows += `<div class="row" style="margin-top:4px"><span class="sw" style="background:#14b8a6"></span><b>enchufables (BEV+PHEV): ${enc.toLocaleString("es-ES")} %</b></div>`;
+      if (i === yrs.length - 1) {
+        rows += `<div class="t-title" style="margin-top:6px">Enchufables por mes de 2026</div>`;
+        MONTHLY_2026.forEach(m => {
+          rows += `<div class="tech"><span class="sw" style="background:#475569"></span>${m[0]}<b>${m[1] == null ? "sin dato" : m[1].toLocaleString("es-ES") + " %"}</b></div>`;
+        });
+      }
+      const mark = i === 5 ? "*" : i === 6 ? "**" : "";
+      tip.innerHTML = `<div class="t-title">Turismos nuevos ${yrs[i]}${mark}</div>${rows}`;
+      tip.style.display = "block";
+      const wrapW = el.parentElement.clientWidth;
+      const tipW = tip.offsetWidth;
+      let left = (x / W) * rect.width + 14;
+      if (left + tipW > wrapW) left = Math.max(0, (x / W) * rect.width - tipW - 14);
+      tip.style.left = left + "px";
+      tip.style.top = "8px";
+    }
+    function out() { tip.style.display = "none"; xh.setAttribute("visibility", "hidden"); }
+    ov.addEventListener("mousemove", move);
+    ov.addEventListener("mouseleave", out);
+    ov.addEventListener("touchstart", e => { move(e.touches[0]); e.preventDefault(); }, { passive: false });
+    ov.addEventListener("touchmove", e => { move(e.touches[0]); e.preventDefault(); }, { passive: false });
+    ov.addEventListener("touchend", out);
+  })();
+
+  // ================= Camino a 2035 =================
+  (function chart2035() {
+    const W = 1000, H = 280, P = { t: 18, r: 20, b: 32, l: 44 };
+    const X = yr => P.l + ((yr - 2026) / (2035 - 2026)) * (W - P.l - P.r);
+    const Y = v => P.t + (1 - v / 100) * (H - P.t - P.b);
+    const es = [[2026, 21.2], [2026.33, 23.1], [2026.42, 23.2], [2026.6, 27.7], [2026.67, 33], [2026.75, 31.5]];
+    const cat = [[2026.42, 28.1], [2026.5, 28.9], [2026.58, 32.4]];
+    const path = pts => pts.map((p, i) => (i ? "L" : "M") + X(p[0]) + " " + Y(p[1])).join("");
+    let g = "";
+    for (let k = 0; k <= 5; k++) {
+      const v = k * 20, y = Y(v);
+      g += `<line x1="${P.l}" x2="${W - P.r}" y1="${y}" y2="${y}" stroke="#22304d"/>
+            <text x="${P.l - 6}" y="${y + 4}" fill="#8fa0b8" font-size="11" text-anchor="end">${v}%</text>`;
+    }
+    for (let yr = 2026; yr <= 2035; yr += 1) g += `<text x="${X(yr)}" y="${H - 10}" fill="#8fa0b8" font-size="11" text-anchor="middle">${yr}</text>`;
+    g += `<line x1="${X(2035)}" x2="${X(2035)}" y1="${P.t}" y2="${H - P.b}" stroke="#ef4444" stroke-dasharray="4 4"/>
+          <text x="${X(2035) - 6}" y="${P.t + 14}" fill="#ef4444" font-size="11" text-anchor="end">2035: 100 % cero emisiones</text>
+          <line x1="${X(2026.75)}" x2="${X(2035)}" y1="${Y(31.5)}" y2="${Y(100)}" stroke="#8fa0b8" stroke-dasharray="5 5"/>
+          <text x="${X(2031)}" y="${Y(74)}" fill="#8fa0b8" font-size="11" transform="rotate(-19 ${X(2031)} ${Y(74)})">senda necesaria ≈ +8 pp/año</text>`;
+    document.getElementById("chart-2035").innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">${g}
+      <path d="${path(es)}" fill="none" stroke="#22c55e" stroke-width="3" stroke-linejoin="round"/>
+      ${es.map(p => `<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="4" fill="#22c55e"/>`).join("")}
+      <path d="${path(cat)}" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linejoin="round"/>
+      ${cat.map(p => `<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="4" fill="#38bdf8"/>`).join("")}</svg>
+      <div class="legend"><span style="color:#22c55e">● España (BEV+PHEV)</span> · <span style="color:#38bdf8">● Catalunya</span></div>`;
+  })();
+
+
+  // ================= Mix por tecnología (calculado del balance mensual REE) =================
+  const MIX_ORDER = ["nuclear", "gas", "carbon", "eolica", "solar", "hidro", "oren", "onoren"];
+  const MIX_NAMES = {
+    nuclear: ["Nuclear", "#facc15"], gas: ["Gas (ciclos, turbinas)", "#a855f7"],
+    carbon: ["Carbón", "#78350f"], eolica: ["Eólica", "#7dd3fc"], solar: ["Solar (fotov. + térmica)", "#fbbf24"],
+    hidro: ["Hidráulica (+ bombeo)", "#2563eb"], oren: ["Otras renovables", "#22c55e"],
+    onoren: ["Cogeneración + residuos", "#64748b"]
+  };
+  const MIX_REN = ["eolica", "solar", "hidro", "oren"];
+  function mixAgg(pts) {
+    const agg = new Map(); let tot = 0;
+    pts.forEach(d => (d.t || []).forEach(T => {
+      if (!T.gwh || T.gwh <= 0) return;
+      agg.set(T.k, (agg.get(T.k) || 0) + T.gwh); tot += T.gwh;
+    }));
+    return { agg, tot };
+  }
+  function renderMix() {
+    const yr = yest.getFullYear();
+    [["es", "España", "mix-es"], ["cat", "Catalunya", "mix-cat"]].forEach(([geo, name, id]) => {
+      const series = (STORE.years[geo] || []).slice().sort((a, b) => (a.year - b.year) || MONTHS.indexOf(a.l) - MONTHS.indexOf(b.l));
+      const ytd = series.filter(d => d.year === yr);
+      const el = document.getElementById(id);
+      if (!ytd.length) { el.innerHTML = "<em>Sin datos del año en curso.</em>"; return; }
+      const ml = ytd.map(d => d.l);
+      const prevP = series.filter(d => d.year === yr - 1 && ml.includes(d.l));
+      const full = series.filter(d => d.year === yr - 1);
+      const cur = mixAgg(ytd), pv = mixAgg(prevP), fl = mixAgg(full);
+      if (!cur.tot) { el.innerHTML = "<em>Sin desglose por tecnología.</em>"; return; }
+      const pct = (a, k) => a.tot ? (a.agg.get(k) || 0) / a.tot * 100 : null;
+      const ren = MIX_REN.reduce((s, k) => s + (cur.agg.get(k) || 0), 0) / cur.tot * 100;
+      const mx = Math.max(...MIX_ORDER.map(k => pct(cur, k) || 0), ...MIX_ORDER.map(k => pct(pv, k) || 0), ...MIX_ORDER.map(k => pct(fl, k) || 0), 1);
+      let html = "";
+      MIX_ORDER.forEach(k => {
+        const [label, colr] = MIX_NAMES[k];
+        const c = pct(cur, k);
+        if (c == null) return;
+        const p = pct(pv, k), f = pct(fl, k);
+        const fmt = x => x == null ? "–" : x.toLocaleString("es-ES", { maximumFractionDigits: 1 }) + " %";
+        const w = x => x == null ? 0 : Math.max(x / mx * 100, 0.75);
+        const dim = "filter: brightness(.65) saturate(.85)";
+        const dim2 = "filter: brightness(.45) saturate(.7)";
+        html += `<div class="mix3">
+          <span class="name">${label}</span>
+          <div class="track"><div style="width:${w(c)}%;background:${colr}"></div></div>
+          <span class="val"><b>${fmt(c)}</b> · ${yr} ${ml[0]}–${ml[ml.length - 1]}</span>
+          <div class="track"><div style="width:${w(p)}%;background:${colr};${dim}"></div></div>
+          <span class="val dim">${yr - 1} ${ml[0]}–${ml[ml.length - 1]}: ${fmt(p)}</span>
+          <div class="track"><div style="width:${w(f)}%;background:${colr};${dim2}"></div></div>
+          <span class="val dim">${yr - 1} ene–dic: ${fmt(f)}</span>
+        </div>`;
+      });
+      html += `<div class="foot-note" style="margin-top:6px">Primera barra (color pleno): ${yr} hasta el último mes cerrado · segunda (mismo color, más oscura): mismo periodo de ${yr - 1} · tercera (aún más oscura): ${yr - 1} completo (ene–dic).</div>`;
+      el.innerHTML = html;
+      document.getElementById(id + "-period").textContent =
+        `${name} · ${yr} (${ml[0]}–${ml[ml.length - 1]}) · renovables: ${ren.toLocaleString("es-ES", { maximumFractionDigits: 1 })} %`;
+    });
+  }
+
+
+  async function getJSON(url) {
+    const res = await fetch(url, { headers: { Accept: "application/json" } });
+    if (!res.ok) throw new Error("HTTP " + res.status);
+    return res.json();
+  }
+  const MONTHS = ["ene","feb","mar","abr","may","jun","jul","ago","sep","oct","nov","dic"];
+  // Desglose por tecnología: categorías del tooltip y su equivalencia con los tipos de la API de REE
+  const TECHS = [
+    { k: "nuclear", lbl: "nuclear", col: "#facc15", ree: ["Nuclear"] },
+    { k: "carbon", lbl: "carbón", col: "#78350f", ree: ["Carbón"] },
+    { k: "gas", lbl: "gas (ciclos, turbinas)", col: "#a855f7", ree: ["Ciclo combinado", "Turbina de gas", "Motores diésel", "Fuel + Gas", "Fuel-Gas"] },
+    { k: "eolica", lbl: "eólica", col: "#7dd3fc", ree: ["Eólica"] },
+    { k: "solar", lbl: "solar (fotov. + térmica)", col: "#fbbf24", ree: ["Solar fotovoltaica", "Solar térmica", "Solar"] },
+    { k: "hidro", lbl: "hidráulica (+ bombeo)", col: "#2563eb", ree: ["Hidráulica", "Turbinación bombeo"] },
+    { k: "oren", lbl: "otras renovables", col: "#22c55e", ree: ["Otras renovables"] },
+    { k: "onoren", lbl: "otras no renovables", col: "#64748b", ree: ["Cogeneración", "Residuos", "Vapor", "Autoproducción"] }
+  ];
+  const REN_KEYS = ["eolica", "solar", "hidro", "oren"];
+  const REE2KEY = {};
+  TECHS.forEach(t => t.ree.forEach(r => { REE2KEY[r] = t.k; }));
+  async function loadBalance(qs, kind) {
+    const j = await getJSON(`${API}/demanda/balance-electrico?${qs}`);
+    const incl = j.included || [];
+    const perDate = new Map();   // fecha -> { g, renGWh, renPct, tech: {k: GWh} }
+    incl.forEach(it => {
+      const ty = it.type || (it.attributes && it.attributes.title);
+      const vs = (it.attributes && it.attributes.values) || [];
+      if (!ty || !vs.length) return;
+      vs.forEach(v => {
+        const d = v.datetime.slice(0, 10);
+        if (!perDate.has(d)) perDate.set(d, {});
+        const P = perDate.get(d);
+        if (ty === "Generación") { P.g = (P.g || 0) + v.value; return; }
+        if (ty === "Renovable") { if (typeof v.percentage === "number") P.renPct = v.percentage; P.renGWh = (P.renGWh || 0) + v.value; return; }
+        const k = REE2KEY[ty];
+        if (k) { P.tech = P.tech || {}; P.tech[k] = (P.tech[k] || 0) + v.value; }
+      });
+    });
+    const out = [];
+    perDate.forEach((P, dt) => {
+
+      // El mes en curso está incompleto (corte: ayer): no mostrarlo como si fuera un mes entero
+      if (kind === "month" && dt.slice(0, 7) === yMonth) {
+        const lastDay = new Date(yest.getFullYear(), yest.getMonth() + 1, 0).getDate();
+        if (yest.getDate() !== lastDay) return;
+      }
+      let l, full;
+      if (kind === "month") { l = MONTHS[+dt.slice(5, 7) - 1]; full = `${l} ${dt.slice(0, 4)}`; }
+      else { l = dt.slice(8, 10) + " " + MONTHS[+dt.slice(5, 7) - 1]; full = `${dt.slice(8, 10)} ${MONTHS[+dt.slice(5, 7) - 1]} ${dt.slice(0, 4)}`; }
+      const techGWh = Object.values(P.tech || {});
+      const tot = techGWh.reduce((a, b) => a + b, 0);
+      const v = (typeof P.renPct === "number") ? P.renPct : (tot > 0 ? (P.renGWh || 0) / tot * 100 : null);
+      if (typeof v !== "number") return;
+      const t = [];
+      if (tot > 0) TECHS.forEach(T => {
+        const gwh = (P.tech || {})[T.k];
+        if (gwh && gwh > 0) t.push({ k: T.k, lbl: T.lbl, col: T.col, pct: gwh / tot * 100, gwh: gwh });
+      });
+      out.push({ l, full, year: +dt.slice(0, 4), v, g: P.g, t });
+    });
+    return out;
+  }
+
+  // ================= Gráfico combinado con tooltip =================
+  const STORE = { d30: { es: [], cat: [] }, years: { es: [], cat: [] } };
+  let comboMode = "30";
+  function comboData() {
+    if (comboMode === "30") return STORE.d30;
+    const from = comboMode === "2020" ? 2020 : 2015;
+    return {
+      es: STORE.years.es.filter(d => d.year >= from),
+      cat: STORE.years.cat.filter(d => d.year >= from)
+    };
+  }
+  function renderCombo() {
+    const el = document.getElementById("chart-combo");
+    const tip = document.getElementById("combo-tip");
+    const ser = comboData()[pageGeo] || [];
+    if (!ser.length) { el.innerHTML = "<em>Sin datos.</em>"; return; }
+    const col = pageGeo === "es" ? "#22c55e" : "#38bdf8";
+    const W = 1000, H = 320, P = { t: 18, r: 15, b: 32, l: 46 };
+    const X = i => P.l + (i / Math.max(ser.length - 1, 1)) * (W - P.l - P.r);
+    const Y = v => P.t + (1 - v / 100) * (H - P.t - P.b);
+    let g = "";
+    for (let k = 0; k <= 4; k++) {
+      const v = k * 25, y = Y(v);
+      g += `<line x1="${P.l}" x2="${W - P.r}" y1="${y}" y2="${y}" stroke="#22304d"/>
+            <text x="${P.l - 6}" y="${y + 4}" fill="#8fa0b8" font-size="11" text-anchor="end">${v}%</text>`;
+    }
+    let labels = "", marks = "";
+    if (comboMode === "30") {
+      const step = Math.ceil(ser.length / 8);
+      ser.forEach((d, i) => { if (i % step === 0) labels += `<text x="${X(i)}" y="${H - 10}" fill="#8fa0b8" font-size="11" text-anchor="middle">${d.l}</text>`; });
+    } else {
+      ser.forEach((d, i) => {
+        if (d.l === "ene" && d.year % 2 === 0) {
+          labels += `<text x="${X(i)}" y="${H - 10}" fill="#8fa0b8" font-size="11" text-anchor="middle">${d.year}</text>`;
+          marks += `<line x1="${X(i)}" x2="${X(i)}" y1="${P.t}" y2="${H - P.b}" stroke="#22304d"/>`;
+        }
+      });
+    }
+    const path = ser.map((d, i) => (i ? "L" : "M") + X(i) + " " + Y(d.v)).join("");
+    el.innerHTML = `<svg id="combo-svg" viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${g}${marks}
+      <path d="${path}" fill="none" stroke="${col}" stroke-width="3" stroke-linejoin="round"/>
+      <circle cx="${X(ser.length - 1)}" cy="${Y(ser[ser.length - 1].v)}" r="4.5" fill="${col}"/>
+      <line id="combo-xhair" x1="0" x2="0" y1="${P.t}" y2="${H - P.b}" stroke="#e6edf7" stroke-dasharray="3 3" visibility="hidden"/>
+      <circle id="combo-dot" r="5" fill="${col}" stroke="#0b1220" stroke-width="2" visibility="hidden"/>
+      <rect id="combo-ov" x="${P.l}" y="${P.t}" width="${W - P.l - P.r}" height="${H - P.t - P.b}" fill="transparent"/>${labels}</svg>`;
+    // Hover con desglose por tecnología
+    const svg = document.getElementById("combo-svg");
+    const ov = document.getElementById("combo-ov");
+    const xh = document.getElementById("combo-xhair");
+    const dot = document.getElementById("combo-dot");
+    function move(ev) {
+      const rect = svg.getBoundingClientRect();
+      const px = ((ev.clientX - rect.left) / rect.width) * W;
+      const frac = Math.max(0, Math.min(1, (px - P.l) / (W - P.l - P.r)));
+      const i = Math.round(frac * Math.max(ser.length - 1, 0));
+      const x = X(i);
+      const a = ser[i];
+      xh.setAttribute("x1", x); xh.setAttribute("x2", x); xh.setAttribute("visibility", "visible");
+      if (a) { dot.setAttribute("cx", x); dot.setAttribute("cy", Y(a.v)); dot.setAttribute("visibility", "visible"); }
+      let body =
+        `<div class="row"><span class="sw" style="background:#22c55e"></span><b>renovable ${a.v.toFixed(1)} %</b> · no renovable ${(100 - a.v).toFixed(1)} %</div>`;
+      if (a.t && a.t.length) {
+        a.t.forEach(T => {
+          body += `<div class="tech"><span class="sw" style="background:${T.col}"></span>${T.lbl}<b>${T.pct.toFixed(1)} %</b></div>`;
+        });
+      }
+      tip.innerHTML = `<div class="t-title">${a.full}${a.g != null ? ` · ${Math.round(a.g).toLocaleString("es-ES")} GWh` : ""}</div>${body}`;
+      tip.style.display = "block";
+      const wrapW = el.parentElement.clientWidth;
+      const tipW = tip.offsetWidth;
+      let left = (x / W) * rect.width + 14;
+      if (left + tipW > wrapW) left = Math.max(0, (x / W) * rect.width - tipW - 14);
+      tip.style.left = left + "px";
+      tip.style.top = "8px";
+    }
+    function out() { tip.style.display = "none"; xh.setAttribute("visibility", "hidden"); dot.setAttribute("visibility", "hidden"); }
+    ov.addEventListener("mousemove", move);
+    ov.addEventListener("mouseleave", out);
+    ov.addEventListener("touchstart", e => { move(e.touches[0]); e.preventDefault(); }, { passive: false });
+    ov.addEventListener("touchmove", e => { move(e.touches[0]); e.preventDefault(); }, { passive: false });
+    ov.addEventListener("touchend", out);
+  }
+  document.getElementById("tab-30").onclick = () => { comboMode = "30"; setActiveTab("tab-30"); renderCombo(); };
+  document.getElementById("tab-2020").onclick = () => { comboMode = "2020"; setActiveTab("tab-2020"); renderCombo(); };
+  document.getElementById("tab-2015").onclick = () => { comboMode = "2015"; setActiveTab("tab-2015"); renderCombo(); };
+  function setActiveTab(id) { ["tab-30", "tab-2020", "tab-2015"].forEach(t => document.getElementById(t).classList.toggle("active", t === id)); }
+
+  function storeAndRender(esD, catD, esY, catY) {
+    STORE.d30.es = esD || []; STORE.d30.cat = catD || [];
+    STORE.years.es = esY || []; STORE.years.cat = catY || [];
+    renderCombo();
+    renderMix();
+    const avg = a => a.length ? (a.reduce((x, y) => x + y.v, 0) / a.length) : null;
+    document.getElementById("tile-ren-es").innerHTML = (avg(STORE.d30.es) != null ? avg(STORE.d30.es).toFixed(1) : "–") + "<small>% de media</small>";
+    document.getElementById("tile-ren-cat").innerHTML = (avg(STORE.d30.cat) != null ? avg(STORE.d30.cat).toFixed(1) : "–") + "<small>% de media</small>";
+  }
+
+  function demos() {
+    // Cuotas base por tecnología (% de generación) para los datos de ejemplo
+    const SH_ES = { nuclear: 20, carbon: 1.5, gas: 20, eolica: 22, solar: 19, hidro: 9, oren: 4, onoren: 4.5 };
+    const SH_CAT = { nuclear: 58, carbon: 0.3, gas: 15, eolica: 9, solar: 1, hidro: 12, oren: 2.5, onoren: 2.2 };
+    const demoT = (shares, totGWh, seed, yr) => {
+      yr = yr || 2015;
+      const age = yr - 2015;
+      // Deriva anual: en 2026 hay más solar/eólica y menos gas/nuclear que en 2015 (como en la realidad)
+      const drift = { solar: 0.8 * age, eolica: 0.3 * age, gas: -0.9 * age, nuclear: -0.35 * age };
+      const sh = {};
+      TECHS.forEach(T => { if (shares[T.k] != null) sh[T.k] = Math.max(0, shares[T.k] + (drift[T.k] || 0)); });
+      const jit = k => 0.8 + 0.4 * Math.abs(Math.sin(seed * 1.7 + k.length * 3.1));
+      const t = [];
+      let sum = 0;
+      Object.keys(sh).forEach(k => sum += sh[k] * jit(k));
+      TECHS.forEach(T => {
+        if (sh[T.k] == null || !sh[T.k]) return;
+        const gwh = sh[T.k] * jit(T.k) / sum * totGWh;
+        t.push({ k: T.k, lbl: T.lbl, col: T.col, pct: gwh / totGWh * 100, gwh: gwh });
+      });
+      return t;
+    };
+    const demoV = (d, base) => Math.max(base - 22, Math.min(92, Math.round((base - 8 + 16 * Math.sin((29 - d) / 2.7) + 7 * Math.sin(d / 1.13) + 4 * Math.sin(d / 0.31) + d * 0.12) * 10) / 10));
+    const D30 = [];
+    for (let d = 0; d < 30; d++) {
+      const dt = DAY.format(new Date(yest.getTime() - (29 - d) * 24 * 3600 * 1000));
+      const l = dt.slice(8, 10) + " " + MONTHS[+dt.slice(5, 7) - 1];
+      const g = 520 + d * 3;
+      D30.push({ l, full: `${l} ${dt.slice(0, 4)}`, year: +dt.slice(0, 4), v: demoV(d, 62), g, t: demoT(SH_ES, g, d, 2026) });
+    }
+    const Ys = [], MONTHS_L = MONTHS;
+    const lastYm = yMonth;   // el mes en curso queda fuera: el corte es ayer y el mes aún no termina
+    for (let yr = 2015; yr <= +yestStr.slice(0, 4); yr++) for (let m = 0; m < 12; m++) {
+      if (`${yr}-${String(m + 1).padStart(2, "0")}` >= lastYm) break;
+      const g = 20000 + m * 500;
+      Ys.push({ l: MONTHS_L[m], full: `${MONTHS_L[m]} ${yr}`, year: yr, v: Math.max(10, Math.min(80, Math.round(((yr - 2015) * 3 + 24 + 16 * Math.sin(m / 1.8)) * 10) / 10)), g, t: demoT(SH_ES, g, yr * 12 + m, yr) });
+    }
+    const C30 = D30.map((x, d) => { const g = 90 + d * 0.5; return { ...x, v: Math.max(5, demoV(d, 44) - 26), g, t: demoT(SH_CAT, g, 3000 + d, 2026) }; });
+    const CYs = Ys.map((x, i) => { const g = 1200 + (x.l === "ene" ? 0 : 60); return { ...x, v: Math.max(8, x.v - 22), g, t: demoT(SH_CAT, g, 4000 + i, x.year) }; });
+    storeAndRender(D30, C30, Ys, CYs);
+    setStatus("demo", "Red bloqueada en la vista previa: datos de ejemplo. El archivo descargado muestra datos reales con corte de ayer.");
+  }
+  function setStatus(mode, msg) {
+    const dot = document.getElementById("status-dot");
+    dot.style.background = mode === "live" ? "#22c55e" : "#f59e0b";
+    document.getElementById("status-text").textContent = msg;
+  }
+  async function load() {
+    try {
+      const [esD, catD, esY, catY] = await Promise.all([
+        loadBalance(qsLast30(false), "day").catch(() => null),
+        loadBalance(qsLast30(true), "day").catch(() => null),
+        loadBalance(qsYears(false), "month").catch(() => null),
+        loadBalance(qsYears(true), "month").catch(() => null)
+      ]);
+      if (!esD && !catD && !esY && !catY) throw new Error("sin datos");
+      storeAndRender(esD || [], catD || [], esY || [], catY || []);
+      if (!esD || !catD || !esY || !catY) setStatus("demo", "Datos en vivo parcialmente inaccesibles: la gráfica combina lo disponible y completa el resto con datos de ejemplo.");
+      else setStatus("live", `Datos en vivo de apidatos.ree.es · corte: ${fmtD(yestStr + "T00")}`);
+    } catch (e) { demos(); }
+  }
+  setGeo("es");
+  load();
+  setInterval(load, 15 * 60 * 1000);
+})();
+</script>
+</body>
+</html>
