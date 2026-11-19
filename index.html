@@ -100,8 +100,8 @@
   <div class="sub">Cuota renovable por día (último mes) y por mes desde 2015 · Cómo se genera la electricidad: nuclear, carbón, gas, solar, eólica… · Despliegue frente a objetivos 2030 · Vehículos hacia 2035 · Fuentes: Red Eléctrica (apidatos), REE, MITECO/PNIEC, Generalitat, ANFAC/ACEA</div>
   <div class="status"><span class="dot" id="status-dot"></span><span id="status-text">Cargando datos (corte: ayer)…</span></div>
   <div class="geo-tabs">
-    <button id="geo-es" class="active">🇪🇸 España</button>
-    <button id="geo-cat">Catalunya</button>
+    <button id="geo-es" class="active"><svg viewBox="0 0 18 12" style="width:18px;height:12px;border-radius:2px;vertical-align:-1px;margin-right:2px"><rect width="18" height="3" fill="#aa151b"/><rect y="3" width="18" height="6" fill="#f1bf00"/><rect y="9" width="18" height="3" fill="#aa151b"/></svg> España</button>
+    <button id="geo-cat"><svg viewBox="0 0 18 12" style="width:18px;height:12px;border-radius:2px;vertical-align:-1px;margin-right:2px"><rect width="18" height="12" fill="#fcdd09"/><rect y="1.33" width="18" height="1.33" fill="#da121a"/><rect y="4" width="18" height="1.33" fill="#da121a"/><rect y="6.67" width="18" height="1.33" fill="#da121a"/><rect y="9.33" width="18" height="1.33" fill="#da121a"/></svg> Catalunya</button>
   </div>
 </header>
 
@@ -131,16 +131,16 @@
       <div class="minibar"><div style="width:1.5%"></div></div>
     </div>
     <div class="tile acc">
-      <div class="label">Enchufables España, octubre</div>
-      <div class="val">31,5 %</div>
-      <div class="meta">de los turismos nuevos (BEV + PHEV) · media ene–oct: 24,6 %</div>
-      <div class="minibar"><div style="width:31.5%"></div></div>
+      <div class="label">Eléctricos (BEV) España, octubre</div>
+      <div class="val">16,7 %</div>
+      <div class="meta">de los turismos nuevos · 16.425 unidades (ANFAC)</div>
+      <div class="minibar"><div style="width:16.7%"></div></div>
     </div>
-    <div class="tile">
-      <div class="label">Gasolina + diésel España, sept</div>
-      <div class="val">18,7 %</div>
-      <div class="meta">cuota de turismos nuevos de combustión pura, mín. histórico</div>
-      <div class="minibar"><div style="width:18.7%;background:linear-gradient(90deg,#b45309,#f59e0b)"></div></div>
+    <div class="tile acc">
+      <div class="label">Híbridos enchufables (PHEV) España, octubre</div>
+      <div class="val">14,8 %</div>
+      <div class="meta">de los turismos nuevos · 14.619 unidades (ANFAC) · juntos: 31,5 %</div>
+      <div class="minibar"><div style="width:14.8%"></div></div>
     </div>
   </section>
 
@@ -169,23 +169,29 @@
       <div class="minibar"><div style="width:3.9%"></div></div>
     </div>
     <div class="tile acc">
-      <div class="label">Enchufables Catalunya, agosto</div>
-      <div class="val">32,4 %</div>
-      <div class="meta">récord mensual de turismos electrificados (BEV + PHEV)</div>
-      <div class="minibar"><div style="width:32.4%"></div></div>
+      <div class="label">Eléctricos (BEV) Catalunya, acum. ene–oct</div>
+      <div class="val">&gt; 22.000 <small>uds</small></div>
+      <div class="meta">≈ 18 % de los turismos nuevos · Fecavem</div>
+      <div class="minibar"><div style="width:18%"></div></div>
+    </div>
+    <div class="tile acc">
+      <div class="label">Híbridos enchufables (PHEV) Catalunya, acum. ene–oct</div>
+      <div class="val">16.321 <small>uds</small></div>
+      <div class="meta">≈ 13,6 % de los turismos nuevos · juntos (ago): 32,4 %</div>
+      <div class="minibar"><div style="width:13.6%"></div></div>
     </div>
   </section>
 
   <section class="grid2" data-geo="es">
     <div class="card">
       <h2>Así avanza el despliegue solar</h2>
-      <div class="hint">Incorporación anual de potencia solar fotovoltaica en España (GW) y objetivo medio anual del PNIEC 2023–2030 (≈ 7 GW/año para pasar de 41 a 76,3 GW).</div>
-      <div id="chart-solar"></div>
+      <div class="hint">Incorporación anual de potencia solar fotovoltaica en España (GW) y objetivo medio anual del PNIEC 2023–2030 (≈ 7 GW/año para pasar de 41 a 76,3 GW). Pasa el ratón para ver los GW de cada año.</div>
+      <div class="combo-wrap"><div id="chart-solar"></div><div class="combo-tip" id="chart-solar-tip"></div></div>
     </div>
     <div class="card">
       <h2>Así avanza el despliegue eólico</h2>
-      <div class="hint">Incorporación anual de potencia eólica en España (GW) y objetivo medio anual del PNIEC 2023–2030 (≈ 5,7 GW/año para pasar de 33,3 a 62 GW).</div>
-      <div id="chart-wind"></div>
+      <div class="hint">Incorporación anual de potencia eólica en España (GW) y objetivo medio anual del PNIEC 2023–2030 (≈ 5,7 GW/año para pasar de 33,3 a 62 GW). Pasa el ratón para ver los GW de cada año.</div>
+      <div class="combo-wrap"><div id="chart-wind"></div><div class="combo-tip" id="chart-wind-tip"></div></div>
     </div>
   </section>
 
@@ -277,11 +283,18 @@
     <p class="foot-note">Cuotas de turismos nuevos (España). Serie 2020–2024 publicada (gasolina 49,8→37,2 %; diésel 27,7→9,5 %; BEV 2,1→5,6 %; PHEV 2,7→5,8 %; GLP/GNC 1,5→3,3 %), según ANFAC y balance anual de mercado. 2025*: gasolina e híbridos no enchufables estimados (electrificados: 19,6 % publicado, BEV 8,8 / PHEV 10,8). 2026**: dato de septiembre (electrificados ≈ 33 %: BEV 18,8, PHEV ≈ 14,2; gasolina 16,2 y diésel 2,5). «Resto» (banda gris oscura hasta el 100 %) = GLP/GNC, hidrógeno y otros: siempre suma la cuota completa hasta el 100 %. Pasa el ratón sobre cada banda para ver los valores año a año.</p>
   </section>
 
-  <section class="card">
+  <section class="card" data-geo="es">
+    <h2>El parque que circula: qué se ve en la carretera · España, desde 2020</h2>
+    <div class="hint">Cuota de cada propulsión en el parque de vehículos en circulación (no en las ventas nuevas): gasolina, diésel, híbridos no enchufables, enchufables (PHEV) y eléctricos (BEV). Pasa el ratón sobre la gráfica para ver el año en detalle. Datos: DGT/ANFAC-IDEAUTO.</div>
+    <div class="combo-wrap"><div id="chart-fleet"></div><div class="combo-tip" id="fleet-tip"></div></div>
+    <p class="foot-note">Figuras publicadas: en 2024 el diésel seguía dominando el parque con el 58,9 % (18,4 M de unidades), la gasolina el 33,8 % y los electrificados apenas el 1,7 % (PHEV 1,0 %, BEV 0,7 %); a comienzos de 2026, diésel 57,1 %, gasolina 33,2 % y electrificados 2,4 % (746.510 BEV+PHEV). Los híbridos no enchufables se muestran separados de la gasolina (técnicamente usan gasolina). Las cuotas de híbridos e intermedias 2020–2022 son estimaciones a partir de la serie de ventas y del parque DGT. «Resto»: GLP/GNC y otros; el total de cada año suma el 100 %.</p>
+  </section>
+
+  <section class="card" data-geo="es">
     <h2>Camino a 2035: fin de gasolina y diésel</h2>
-    <div class="hint">Cuota de coches enchufables (BEV + PHEV) frente al objetivo de la UE: desde 2035 los coches nuevos tendrán que ser de cero emisiones (100 % de reducción de CO₂), es decir, sin gasolina, diésel ni PHEV nuevos. Línea discontinua: senda necesaria (~8–9 puntos al año) hasta el 100 % en 2035.</div>
-    <div id="chart-2035"></div>
-    <p class="foot-note">Puntos 2026: España – ene–feb 21,2 %, mayo 23,1 %, junio 23,2 %, agosto 27,7 %, sept ~33 %, octubre 31,5 % (BEV oct: 16.425 uds; PHEV: 14.619 uds). Catalunya – junio 28,1 %, julio 28,9 %, agosto 32,4 %. A este ritmo (≈ +8 pp/año) se llegaría al 100 % hacia 2035, aunque el PHEV también desaparecerá como venta nueva.</p>
+    <div class="hint">Cuota mensual de coches enchufables (BEV + PHEV) en los turismos nuevos de España, mes a mes desde febrero de 2021 (2020: media anual), frente al objetivo de la UE: desde 2035 los coches nuevos tendrán que ser de cero emisiones, es decir, sin gasolina, diésel ni PHEV nuevos. Pasa el ratón sobre los puntos para ver el desglose (BEV, PHEV) de cada mes. Línea discontinua: senda necesaria hasta el 100 % en 2035.</div>
+    <div class="combo-wrap"><div id="chart-2035"></div><div class="combo-tip" id="y2035-tip"></div></div>
+    <p class="foot-note">España, cuota de enchufables (BEV+PHEV) en turismos nuevos, elaborada a partir de los informes mensuales de matriculaciones por fuente de energía de ANFAC/Ideauto (datos DGT): media anual 2020: 4,8 %; serie mensual desde feb 2021. Enero, marzo y mayo de 2021 no se publicaron en ese formato: su tramo se dibuja discontinuo y el puntero solo se detiene en meses publicados. Hitos recientes: agosto 2026: 27,7 %, septiembre: 34,0 % (máximo), octubre: 31,5 %. Medias anuales publicadas como referencia: 7,8 % (2021), 9,7 % (2022), 12,0 % (2023), 11,4 % (2024), 19,6 % (2025). La senda necesaria (≈ +8 pp/año) llevaría al 100 % en 2035; el PHEV también desaparecerá como venta nueva. No existe una serie mensual homóloga publicada para Catalunya, por lo que la tarjeta se muestra solo en la pestaña de España.</p>
   </section>
 </main>
 
@@ -330,6 +343,7 @@
       `<span><span style="display:inline-block;width:10px;height:10px;background:#334155;border-radius:3px;margin-right:5px"></span>no renovable</span>`;
     fixGrids();
     renderCombo();
+    render2035();
   }
   document.getElementById("geo-es").onclick = () => setGeo("es");
   document.getElementById("geo-cat").onclick = () => setGeo("cat");
@@ -344,39 +358,79 @@
       <div class="foot-note">${d.note}</div>`;
   });
 
-  // ================= Zubau solar / eólica (barras con objetivo) =================
-  function zubauChart(el, data, target, goalLabel) {
+  // ================= Zubau solar / eólica (barras con objetivo + tooltip) =================
+  function zubauChart(id, data, target, goalLabel) {
+    const el = document.getElementById(id);
+    const tip = document.getElementById(id + "-tip");
+    const Y0 = 2020, Y1 = 2027;
     const W = 1000, H = 270, P = { t: 18, r: 15, b: 30, l: 44 };
-    const years = data.map(d => d[0]).concat(2026, 2027, 2028, 2029, 2030);
     const mx = Math.max(target, ...data.map(d => d[1])) * 1.15;
-    const X = yr => P.l + (yr - years[0]) / (2030 - years[0]) * (W - P.l - P.r);
+    const band = (W - P.l - P.r) / (Y1 - Y0 + 1);
+    const X = yr => P.l + (yr - Y0 + 0.5) * band;
     const Y = v => P.t + (1 - v / mx) * (H - P.t - P.b);
-    const bw = Math.max(X(2021) - X(2020) - 4, 6);
+    const bw = Math.max(band - 10, 6);
     let g = `<line x1="${P.l}" x2="${W - P.r}" y1="${Y(target)}" y2="${Y(target)}" stroke="#f59e0b" stroke-dasharray="5 5"/>
       <text x="${W - P.r}" y="${Y(target) - 6}" fill="#f59e0b" font-size="11" text-anchor="end">${goalLabel}</text>`;
     for (let k = 0; k <= 4; k++) {
       const v = mx * k / 4, y = Y(v);
       g += `<line x1="${P.l}" x2="${W - P.r}" y1="${y}" y2="${y}" stroke="#22304d"/>
-            <text x="${P.l - 6}" y="${y + 4}" fill="#8fa0b8" font-size="11" text-anchor="end">${v.toFixed(0)}</text>`;
+            <text x="${P.l - 6}" y="${y + 4}" fill="#8fa0b8" font-size="11" text-anchor="end">${v.toLocaleString("es-ES", { maximumFractionDigits: 1 })}</text>`;
     }
-    let bars = "";
-    data.forEach(d => {
-      bars += `<rect x="${X(d[0]) - bw / 2}" y="${Y(d[1])}" width="${bw}" height="${Y(0) - Y(d[1])}" rx="3" fill="#fbbf24"><title>${d[0]}: ${d[1]} GW</title></rect>`;
-    });
-    for (let yr = 2026; yr <= 2030; yr++) {
-      bars += `<rect x="${X(yr) - bw / 2}" y="${Y(target) * 0 + Y(target)}" width="${bw}" height="${Y(0) - Y(target)}" rx="3" fill="none" stroke="#f59e0b" stroke-dasharray="4 3"><title>Objetivo medio ${yr}: ${target} GW</title></rect>`;
-    }
-    let labels = "";
-    years.filter((v, i, a) => a.indexOf(v) === i).forEach(yr => {
+    let bars = "", labels = "";
+    for (let yr = Y0; yr <= Y1; yr++) {
       labels += `<text x="${X(yr)}" y="${H - 10}" fill="#8fa0b8" font-size="11" text-anchor="middle">${yr}</text>`;
-    });
-    el.innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">${g}${bars}${labels}</svg>
+      const v = data.find(d => d[0] === yr);
+      if (v) {
+        bars += `<rect x="${X(yr) - bw / 2}" y="${Y(v[1])}" width="${bw}" height="${Y(0) - Y(v[1])}" rx="3" fill="#fbbf24"/>`;
+      } else {
+        // años aún sin dato real: barra de objetivo pendiente
+        bars += `<rect x="${X(yr) - bw / 2}" y="${Y(target)}" width="${bw}" height="${Y(0) - Y(target)}" rx="3" fill="none" stroke="#f59e0b" stroke-dasharray="4 3"/>`;
+      }
+    }
+    el.innerHTML = `<svg id="${id}-svg" viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${g}${bars}
+      <line id="${id}-xhair" x1="0" x2="0" y1="${P.t}" y2="${H - P.b}" stroke="#e6edf7" stroke-dasharray="3 3" visibility="hidden"/>
+      <rect id="${id}-ov" x="${P.l}" y="${P.t}" width="${W - P.l - P.r}" height="${H - P.t - P.b}" fill="transparent"/>${labels}</svg>
       <div class="legend"><span><span style="display:inline-block;width:10px;height:10px;background:#fbbf24;border-radius:3px;margin-right:5px"></span>incorporado</span> · <span><span style="display:inline-block;width:10px;height:10px;border:1.5px dashed #f59e0b;border-radius:3px;margin-right:5px"></span>objetivo anual PNIEC</span></div>`;
+    // Hover: GW de cada año
+    const svg = document.getElementById(id + "-svg");
+    const ov = document.getElementById(id + "-ov");
+    const xh = document.getElementById(id + "-xhair");
+    const inData = new Map(data.map(d => [d[0], d[1]]));
+    function move(ev) {
+      const rect = svg.getBoundingClientRect();
+      const px = ((ev.clientX - rect.left) / rect.width) * W;
+      const frac = Math.max(0, Math.min(1, (px - P.l) / (W - P.l - P.r)));
+      const yr = Math.min(Y1, Math.max(Y0, Y0 + Math.floor(frac * (Y1 - Y0 + 1))));
+      const x = X(yr);
+      xh.setAttribute("x1", x); xh.setAttribute("x2", x); xh.setAttribute("visibility", "visible");
+      const v = inData.get(yr);
+      let rows;
+      if (v != null) {
+        rows = `<div class="tech"><span class="sw" style="background:#fbbf24"></span>incorporado<b>${v.toLocaleString("es-ES")} GW</b></div>
+                <div class="tech"><span class="sw" style="background:#334155"></span>objetivo PNIEC<b>${target.toLocaleString("es-ES")} GW</b></div>`;
+      } else {
+        rows = `<div class="tech"><span class="sw" style="background:#334155"></span>objetivo medio pendiente<b>${target.toLocaleString("es-ES")} GW/año</b></div>`;
+      }
+      tip.innerHTML = `<div class="t-title">${yr}${v != null ? "" : " · objetivo"}</div>${rows}`;
+      tip.style.display = "block";
+      const wrapW = el.parentElement.clientWidth;
+      const tipW = tip.offsetWidth;
+      let left = (x / W) * rect.width + 14;
+      if (left + tipW > wrapW) left = Math.max(0, (x / W) * rect.width - tipW - 14);
+      tip.style.left = left + "px";
+      tip.style.top = "8px";
+    }
+    function out() { tip.style.display = "none"; xh.setAttribute("visibility", "hidden"); }
+    ov.addEventListener("mousemove", move);
+    ov.addEventListener("mouseleave", out);
+    ov.addEventListener("touchstart", e => { move(e.touches[0]); e.preventDefault(); }, { passive: false });
+    ov.addEventListener("touchmove", e => { move(e.touches[0]); e.preventDefault(); }, { passive: false });
+    ov.addEventListener("touchend", out);
   }
   // Incorporación anual en GW (REE, informes del sistema; años previos a 2024 estimados por diferencia de potencia instalada)
-  zubauChart(document.getElementById("chart-solar"),
-    [[2019, 3.9], [2020, 2.9], [2021, 1.9], [2022, 3.9], [2023, 5.6], [2024, 6.0], [2025, 8.8]], 7, "≈ 7 GW/año (PNIEC)");
-  zubauChart(document.getElementById("chart-wind"),
+  zubauChart("chart-solar",
+    [[2020, 2.9], [2021, 1.9], [2022, 3.9], [2023, 5.6], [2024, 6.0], [2025, 8.8]], 7, "≈ 7 GW/año (PNIEC)");
+  zubauChart("chart-wind",
     [[2020, 1.7], [2021, 0.8], [2022, 1.4], [2023, 0.7], [2024, 1.3], [2025, 1.2]], 5.7, "≈ 5,7 GW/año (PNIEC)");
 
   // ================= Cuota combustibles (área apilada) =================
@@ -415,7 +469,6 @@
     }
     let labels = "";
     yrs.forEach((yr, i) => { labels += `<text x="${X(i)}" y="${H - 10}" fill="#8fa0b8" font-size="11" text-anchor="middle">${yr}${yr === 2025 ? "*" : yr === 2026 ? "**" : ""}</text>`; });
-    const MONTHLY_2026 = [["ene–feb", 21.2], ["mar", null], ["abr", null], ["may", 23.1], ["jun", 23.2], ["jul", null], ["ago", 27.7], ["sep", 33], ["oct", 31.5], ["nov", null], ["dic", null]];
     document.getElementById("chart-cars-share").innerHTML = `<svg id="cars-svg" viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${g}${polys}
       <polygon points="${rPts} ${X(yrs.length - 1)},${Y(0)} ${X(0)},${Y(0)}" fill="#1a2740"><title>${yrs.map((yr, i) => `${yr}: resto ${resto[i].toLocaleString("es-ES")} %`).join(" · ")}</title></polygon>
       <line id="cars-xhair" x1="0" x2="0" y1="${P.t}" y2="${H - P.b}" stroke="#e6edf7" stroke-dasharray="3 3" visibility="hidden"/>
@@ -449,12 +502,6 @@
       });
       const enc = vs[3] + vs[4];
       rows += `<div class="row" style="margin-top:4px"><span class="sw" style="background:#14b8a6"></span><b>enchufables (BEV+PHEV): ${enc.toLocaleString("es-ES")} %</b></div>`;
-      if (i === yrs.length - 1) {
-        rows += `<div class="t-title" style="margin-top:6px">Enchufables por mes de 2026</div>`;
-        MONTHLY_2026.forEach(m => {
-          rows += `<div class="tech"><span class="sw" style="background:#475569"></span>${m[0]}<b>${m[1] == null ? "sin dato" : m[1].toLocaleString("es-ES") + " %"}</b></div>`;
-        });
-      }
       const mark = i === 5 ? "*" : i === 6 ? "**" : "";
       tip.innerHTML = `<div class="t-title">Turismos nuevos ${yrs[i]}${mark}</div>${rows}`;
       tip.style.display = "block";
@@ -473,32 +520,190 @@
     ov.addEventListener("touchend", out);
   })();
 
-  // ================= Camino a 2035 =================
-  (function chart2035() {
-    const W = 1000, H = 280, P = { t: 18, r: 20, b: 32, l: 44 };
-    const X = yr => P.l + ((yr - 2026) / (2035 - 2026)) * (W - P.l - P.r);
+  // ================= Parque en circulación (España, desde 2020) =================
+  (function fleetShare() {
+    const yrs = [2020, 2021, 2022, 2023, 2024, 2025, 2026];
+    // Diésel/gasolina/electrificados publicados (DGT, ANFAC-IDEAUTO); híbridos y años intermedios estimados
+    const bands = [
+      { n: "diésel", c: "#7f1d1d", v: [61.5, 60.8, 60.2, 59.4, 58.9, 58.0, 57.1] },
+      { n: "gasolina (sin híbridos)", c: "#b91c1c", v: [32.2, 31.2, 30.1, 28.2, 26.8, 26.0, 25.4] },
+      { n: "híbridos no enchufables", c: "#475569", v: [2.3, 3.4, 4.6, 5.8, 7.0, 8.4, 9.9] },
+      { n: "híbridos enchufables (PHEV)", c: "#14b8a6", v: [0.4, 0.6, 0.7, 0.8, 1.0, 1.2, 1.4] },
+      { n: "eléctricos (BEV)", c: "#0ea5e9", v: [0.2, 0.3, 0.4, 0.5, 0.7, 0.9, 1.0] }
+    ];
+    const resto = yrs.map((_, i) => Math.max(0, 100 - bands.reduce((s, b) => s + b.v[i], 0)));
+    const el = document.getElementById("chart-fleet");
+    const tip = document.getElementById("fleet-tip");
+    const W = 1000, H = 300, P = { t: 14, r: 15, b: 30, l: 40 };
+    const X = i => P.l + i / (yrs.length - 1) * (W - P.l - P.r);
     const Y = v => P.t + (1 - v / 100) * (H - P.t - P.b);
-    const es = [[2026, 21.2], [2026.33, 23.1], [2026.42, 23.2], [2026.6, 27.7], [2026.67, 33], [2026.75, 31.5]];
-    const cat = [[2026.42, 28.1], [2026.5, 28.9], [2026.58, 32.4]];
-    const path = pts => pts.map((p, i) => (i ? "L" : "M") + X(p[0]) + " " + Y(p[1])).join("");
+    const order = [...bands].reverse();
+    const botCum = resto.map(r => r);
+    let polys = "";
+    order.forEach(b => {
+      const bot = [...botCum];
+      const top = bot.map((v, i) => v + b.v[i]);
+      const pts = top.map((v, i) => `${X(i)},${Y(v)}`).join(" ") + " " + top.map((v, i) => `${X(i)},${Y(bot[i])}`).reverse().join(" ");
+      polys += `<polygon points="${pts}" fill="${b.c}"/>`;
+      for (let i = 0; i < top.length; i++) botCum[i] = top[i];
+    });
+    const rPts = resto.map((v, i) => `${X(i)},${Y(v)}`).join(" ");
+    let g = "";
+    for (let k = 0; k <= 4; k++) {
+      g += `<line x1="${P.l}" x2="${W - P.r}" y1="${Y(k * 25)}" y2="${Y(k * 25)}" stroke="#22304d"/>
+            <text x="${P.l - 6}" y="${Y(k * 25) + 4}" fill="#8fa0b8" font-size="11" text-anchor="end">${k * 25}%</text>`;
+    }
+    let labels = "";
+    yrs.forEach((yr, i) => { labels += `<text x="${X(i)}" y="${H - 10}" fill="#8fa0b8" font-size="11" text-anchor="middle">${yr}${yr === 2026 ? "*" : ""}</text>`; });
+    el.innerHTML = `<svg id="fleet-svg" viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${g}
+      <polygon points="${rPts} ${X(yrs.length - 1)},${Y(0)} ${X(0)},${Y(0)}" fill="#1a2740"/>
+      ${polys}<line id="fleet-xhair" x1="0" x2="0" y1="${P.t}" y2="${H - P.b}" stroke="#e6edf7" stroke-dasharray="3 3" visibility="hidden"/>
+      <rect id="fleet-ov" x="${P.l}" y="${P.t}" width="${W - P.l - P.r}" height="${H - P.t - P.b}" fill="transparent"/>${labels}</svg>
+      <div class="legend">
+        <span><span style="display:inline-block;width:10px;height:10px;background:#7f1d1d;border-radius:3px;margin-right:5px"></span>diésel</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#b91c1c;border-radius:3px;margin-right:5px"></span>gasolina (sin híbridos)</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#475569;border-radius:3px;margin-right:5px"></span>híbridos no enchufables</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#14b8a6;border-radius:3px;margin-right:5px"></span>PHEV</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#0ea5e9;border-radius:3px;margin-right:5px"></span>BEV</span>
+        <span><span style="display:inline-block;width:10px;height:10px;background:#1a2740;border-radius:3px;margin-right:5px"></span>resto (GLP/GNC…)</span></div>`;
+    const svg = document.getElementById("fleet-svg");
+    const ov = document.getElementById("fleet-ov");
+    const xh = document.getElementById("fleet-xhair");
+    function move(ev) {
+      const rect = svg.getBoundingClientRect();
+      const px = ((ev.clientX - rect.left) / rect.width) * W;
+      const i = Math.max(0, Math.min(yrs.length - 1, Math.round((px - P.l) / (W - P.l - P.r) * (yrs.length - 1))));
+      const x = X(i);
+      xh.setAttribute("x1", x); xh.setAttribute("x2", x); xh.setAttribute("visibility", "visible");
+      let rows = "";
+      bands.forEach(b => { rows += `<div class="tech"><span class="sw" style="background:${b.c}"></span>${b.n}<b>${b.v[i].toLocaleString("es-ES")} %</b></div>`; });
+      rows += `<div class="tech"><span class="sw" style="background:#1a2740"></span>resto (GLP/GNC…)<b>${resto[i].toLocaleString("es-ES")} %</b></div>`;
+      const enc = bands[3].v[i] + bands[4].v[i];
+      rows += `<div class="row" style="margin-top:4px"><span class="sw" style="background:#14b8a6"></span><b>electrificados (BEV+PHEV): ${enc.toLocaleString("es-ES")} %</b></div>`;
+      tip.innerHTML = `<div class="t-title">Parque en circulación · ${yrs[i]}${i === 6 ? "* (a comienzos de año)" : ""}</div>${rows}`;
+      tip.style.display = "block";
+      const wrapW = el.parentElement.clientWidth;
+      const tipW = tip.offsetWidth;
+      let left = (x / W) * rect.width + 14;
+      if (left + tipW > wrapW) left = Math.max(0, (x / W) * rect.width - tipW - 14);
+      tip.style.left = left + "px";
+      tip.style.top = "8px";
+    }
+    function out() { tip.style.display = "none"; xh.setAttribute("visibility", "hidden"); }
+    ov.addEventListener("mousemove", move);
+    ov.addEventListener("mouseleave", out);
+    ov.addEventListener("touchstart", e => { move(e.touches[0]); e.preventDefault(); }, { passive: false });
+    ov.addEventListener("touchmove", e => { move(e.touches[0]); e.preventDefault(); }, { passive: false });
+    ov.addEventListener("touchend", out);
+  })();
+
+  // ================= Camino a 2035 =================
+  // [año + (mes-1)/12, enchufables %, BEV %, PHEV %, etiqueta] · ANFAC/Ideauto (DGT)
+  // 2020: media anual (no existe serie mensual); ene/mar/may 2021 no publicados → tramo discontinuo
+  const M2035 = [
+    [2020.5, 4.8, 2.1, 2.7, "2020 · media anual"],
+    [2021.0833, 5.3, 1.6, 3.7, "feb 2021"], [2021.25, 5.7, 1.8, 3.9, "abr 2021"],
+    [2021.4167, 7.3, 2.7, 4.6, "jun 2021"], [2021.5, 6.7, 1.9, 4.8, "jul 2021"],
+    [2021.5833, 8.4, 2.7, 5.7, "ago 2021"], [2021.6667, 11.5, 4.9, 6.6, "sep 2021"],
+    [2021.75, 11.1, 4.0, 7.1, "oct 2021"], [2021.8333, 10.8, 4.2, 6.6, "nov 2021"],
+    [2021.9167, 9.7, 4.1, 5.6, "dic 2021"],
+    [2022.0, 11.8, 4.2, 7.6, "ene 2022"], [2022.0833, 10.2, 3.8, 6.3, "feb 2022"],
+    [2022.1667, 10.7, 5.2, 5.5, "mar 2022"], [2022.25, 9.1, 2.8, 6.3, "abr 2022"],
+    [2022.3333, 7.9, 2.3, 5.6, "may 2022"], [2022.4167, 8.3, 3.5, 4.8, "jun 2022"],
+    [2022.5, 7.8, 2.8, 4.9, "jul 2022"], [2022.5833, 8.0, 2.7, 5.3, "ago 2022"],
+    [2022.6667, 11.1, 4.9, 6.2, "sep 2022"], [2022.75, 10.1, 4.1, 6.0, "oct 2022"],
+    [2022.8333, 11.1, 4.5, 6.6, "nov 2022"], [2022.9167, 10.9, 4.6, 6.3, "dic 2022"],
+    [2023.0, 11.2, 4.8, 6.4, "ene 2023"], [2023.0833, 11.0, 4.5, 6.5, "feb 2023"],
+    [2023.1667, 10.3, 4.3, 6.0, "mar 2023"], [2023.25, 10.4, 4.6, 5.8, "abr 2023"],
+    [2023.3333, 11.3, 4.8, 6.5, "may 2023"], [2023.4167, 11.8, 5.4, 6.4, "jun 2023"],
+    [2023.5, 10.6, 4.2, 6.4, "jul 2023"], [2023.5833, 12.4, 6.4, 6.0, "ago 2023"],
+    [2023.6667, 12.6, 5.4, 7.2, "sep 2023"], [2023.75, 12.9, 6.5, 6.4, "oct 2023"],
+    [2023.8333, 14.8, 7.7, 7.0, "nov 2023"], [2023.9167, 15.2, 7.2, 8.0, "dic 2023"],
+    [2024.0, 11.6, 4.9, 6.7, "ene 2024"], [2024.0833, 11.5, 4.7, 6.8, "feb 2024"],
+    [2024.1667, 10.3, 4.4, 5.9, "mar 2024"], [2024.25, 9.7, 4.2, 5.5, "abr 2024"],
+    [2024.3333, 9.6, 4.6, 5.0, "may 2024"], [2024.4167, 10.4, 5.4, 5.0, "jun 2024"],
+    [2024.5, 9.8, 4.6, 5.3, "jul 2024"], [2024.5833, 10.9, 5.2, 5.8, "ago 2024"],
+    [2024.6667, 14.2, 8.7, 5.6, "sep 2024"], [2024.75, 11.9, 5.7, 6.2, "oct 2024"],
+    [2024.8333, 12.8, 6.9, 5.8, "nov 2024"], [2024.9167, 14.4, 8.4, 6.0, "dic 2024"],
+    [2025.0, 14.2, 6.9, 7.2, "ene 2025"], [2025.0833, 14.4, 6.8, 7.6, "feb 2025"],
+    [2025.1667, 14.1, 6.9, 7.2, "mar 2025"], [2025.25, 16.2, 6.9, 9.3, "abr 2025"],
+    [2025.3333, 19.4, 7.9, 11.4, "may 2025"], [2025.4167, 20.8, 9.4, 11.4, "jun 2025"],
+    [2025.5, 21.4, 8.8, 12.5, "jul 2025"], [2025.5833, 24.4, 11.5, 12.9, "ago 2025"],
+    [2025.6667, 24.0, 11.9, 12.2, "sep 2025"], [2025.75, 22.4, 9.4, 13.0, "oct 2025"],
+    [2025.8333, 22.6, 9.9, 12.7, "nov 2025"], [2025.9167, 23.2, 10.9, 12.3, "dic 2025"],
+    [2026.0, 20.8, 8.9, 12.0, "ene 2026"], [2026.0833, 21.6, 9.2, 12.5, "feb 2026"],
+    [2026.1667, 20.5, 9.1, 11.4, "mar 2026"], [2026.25, 21.3, 9.1, 12.2, "abr 2026"],
+    [2026.3333, 23.0, 10.8, 12.3, "may 2026"], [2026.4167, 23.2, 11.1, 12.1, "jun 2026"],
+    [2026.5, 24.7, 10.5, 14.2, "jul 2026"], [2026.5833, 27.7, 13.4, 14.3, "ago 2026"],
+    [2026.6667, 34.0, 18.5, 15.5, "sep 2026"], [2026.75, 31.5, 16.7, 14.8, "oct 2026"]
+  ];
+  function render2035() {
+    const el = document.getElementById("chart-2035");
+    const tip = document.getElementById("y2035-tip");
+    const W = 1000, H = 280, P = { t: 18, r: 20, b: 32, l: 44 };
+    const X = yr => P.l + ((yr - 2020) / (2035 - 2020)) * (W - P.l - P.r);
+    const Y = v => P.t + (1 - v / 100) * (H - P.t - P.b);
+    const col = "#22c55e";
+    const last = M2035[M2035.length - 1];
+    // Tramos: línea continua entre meses consecutivos; discontinua en los huecos
+    // (ene/mar/may 2021 no publicados) y entre la media anual 2020 y feb 2021
+    let solid = "", dash = "";
+    for (let i = 1; i < M2035.length; i++) {
+      const a = M2035[i - 1], b = M2035[i];
+      const seg = `M${X(a[0])} ${Y(a[1])}L${X(b[0])} ${Y(b[1])}`;
+      if (b[0] - a[0] > 0.09) dash += seg; else solid += seg;
+    }
     let g = "";
     for (let k = 0; k <= 5; k++) {
       const v = k * 20, y = Y(v);
       g += `<line x1="${P.l}" x2="${W - P.r}" y1="${y}" y2="${y}" stroke="#22304d"/>
             <text x="${P.l - 6}" y="${y + 4}" fill="#8fa0b8" font-size="11" text-anchor="end">${v}%</text>`;
     }
-    for (let yr = 2026; yr <= 2035; yr += 1) g += `<text x="${X(yr)}" y="${H - 10}" fill="#8fa0b8" font-size="11" text-anchor="middle">${yr}</text>`;
+    for (let yr = 2020; yr <= 2035; yr++) g += `<text x="${X(yr)}" y="${H - 10}" fill="#8fa0b8" font-size="11" text-anchor="middle">${yr % 2 === 0 ? yr : ""}</text>`;
     g += `<line x1="${X(2035)}" x2="${X(2035)}" y1="${P.t}" y2="${H - P.b}" stroke="#ef4444" stroke-dasharray="4 4"/>
           <text x="${X(2035) - 6}" y="${P.t + 14}" fill="#ef4444" font-size="11" text-anchor="end">2035: 100 % cero emisiones</text>
-          <line x1="${X(2026.75)}" x2="${X(2035)}" y1="${Y(31.5)}" y2="${Y(100)}" stroke="#8fa0b8" stroke-dasharray="5 5"/>
-          <text x="${X(2031)}" y="${Y(74)}" fill="#8fa0b8" font-size="11" transform="rotate(-19 ${X(2031)} ${Y(74)})">senda necesaria ≈ +8 pp/año</text>`;
-    document.getElementById("chart-2035").innerHTML = `<svg viewBox="0 0 ${W} ${H}" style="width:100%;height:auto">${g}
-      <path d="${path(es)}" fill="none" stroke="#22c55e" stroke-width="3" stroke-linejoin="round"/>
-      ${es.map(p => `<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="4" fill="#22c55e"/>`).join("")}
-      <path d="${path(cat)}" fill="none" stroke="#38bdf8" stroke-width="3" stroke-linejoin="round"/>
-      ${cat.map(p => `<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="4" fill="#38bdf8"/>`).join("")}</svg>
-      <div class="legend"><span style="color:#22c55e">● España (BEV+PHEV)</span> · <span style="color:#38bdf8">● Catalunya</span></div>`;
-  })();
+          <line x1="${X(last[0])}" x2="${X(2035)}" y1="${Y(last[1])}" y2="${Y(100)}" stroke="#8fa0b8" stroke-dasharray="5 5"/>
+          <text x="${X((last[0] + 2035) / 2)}" y="${Y((last[1] + 100) / 2) - 8}" fill="#8fa0b8" font-size="11" transform="rotate(-19 ${X((last[0] + 2035) / 2)} ${Y((last[1] + 100) / 2) - 8})">senda necesaria ≈ +8 pp/año</text>`;
+    el.innerHTML = `<svg id="y2035-svg" viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${g}
+      <path d="${dash}" fill="none" stroke="${col}" stroke-width="2" stroke-dasharray="5 4" opacity=".65"/>
+      <path d="${solid}" fill="none" stroke="${col}" stroke-width="3" stroke-linejoin="round"/>
+      ${M2035.map(p => `<circle cx="${X(p[0])}" cy="${Y(p[1])}" r="${p[4].includes("media anual") ? 5 : 3}" fill="${col}"/>`).join("")}
+      <line id="y2035-xhair" x1="0" x2="0" y1="${P.t}" y2="${H - P.b}" stroke="#e6edf7" stroke-dasharray="3 3" visibility="hidden"/>
+      <rect id="y2035-ov" x="${P.l}" y="${P.t}" width="${W - P.l - P.r}" height="${H - P.t - P.b}" fill="transparent"/></svg>
+      <div class="legend"><span style="color:${col}">● España · turismos nuevos enchufables (BEV+PHEV), mensual desde feb 2021 · 2020: media anual · tramo discontinuo: meses no publicados</span></div>`;
+    // Hover: mes señalado y su desglose BEV/PHEV
+    const svg = document.getElementById("y2035-svg");
+    const ov = document.getElementById("y2035-ov");
+    const xh = document.getElementById("y2035-xhair");
+    function move(ev) {
+      const rect = svg.getBoundingClientRect();
+      const px = ((ev.clientX - rect.left) / rect.width) * W;
+      const frac = Math.max(0, Math.min(1, (px - P.l) / (W - P.l - P.r)));
+      const af = 2020 + frac * 15;
+      let best = M2035[0];
+      M2035.forEach(p => { if (Math.abs(p[0] - af) < Math.abs(best[0] - af)) best = p; });
+      const x = X(best[0]);
+      xh.setAttribute("x1", x); xh.setAttribute("x2", x); xh.setAttribute("visibility", "visible");
+      const n = v => v.toLocaleString("es-ES");
+      let rows = `<div class="row"><span class="sw" style="background:${col}"></span><b>enchufables (BEV+PHEV): ${n(best[1])} %</b></div>` +
+        `<div class="tech"><span class="sw" style="background:#0ea5e9"></span>eléctricos (BEV)<b>${n(best[2])} %</b></div>` +
+        `<div class="tech"><span class="sw" style="background:#14b8a6"></span>híbridos enchufables (PHEV)<b>${n(best[3])} %</b></div>`;
+      tip.innerHTML = `<div class="t-title">Turismos nuevos · ${best[4]}</div>${rows}`;
+      tip.style.display = "block";
+      const wrapW = el.parentElement.clientWidth;
+      const tipW = tip.offsetWidth;
+      let left = (x / W) * rect.width + 14;
+      if (left + tipW > wrapW) left = Math.max(0, (x / W) * rect.width - tipW - 14);
+      tip.style.left = left + "px";
+      tip.style.top = "8px";
+    }
+    function out() { tip.style.display = "none"; xh.setAttribute("visibility", "hidden"); }
+    ov.addEventListener("mousemove", move);
+    ov.addEventListener("mouseleave", out);
+    ov.addEventListener("touchstart", e => { move(e.touches[0]); e.preventDefault(); }, { passive: false });
+    ov.addEventListener("touchmove", e => { move(e.touches[0]); e.preventDefault(); }, { passive: false });
+    ov.addEventListener("touchend", out);
+  }
 
 
   // ================= Mix por tecnología (calculado del balance mensual REE) =================
