@@ -41,6 +41,8 @@
   footer { max-width: 1100px; margin: 28px auto 0; font-size: .75rem; color: var(--muted); }
   footer a { color: var(--blue); text-decoration: none; }
   .grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+  @media (max-width: 1050px) { .grid3 { grid-template-columns: 1fr; } }
   @media (max-width: 800px) { .grid2 { grid-template-columns: 1fr; } }
   table { width: 100%; border-collapse: collapse; font-size: .82rem; }
   th, td { text-align: right; padding: 6px 8px; border-bottom: 1px solid var(--line); }
@@ -182,16 +184,21 @@
     </div>
   </section>
 
-  <section class="grid2" data-geo="es">
+  <section class="grid3 deploy-cards" data-geo="es">
     <div class="card">
       <h2>Así avanza el despliegue solar</h2>
-      <div class="hint">Incorporación anual de potencia solar fotovoltaica en España (GW) y objetivo medio anual del PNIEC 2023–2030 (≈ 7 GW/año para pasar de 41 a 76,3 GW). Pasa el ratón para ver los GW de cada año.</div>
+      <div class="hint">Incorporación anual de potencia solar fotovoltaica en España (GW, REE). El PNIEC fija 76,3 GW acumulados en 2030: la senda no es constante y el ritmo medio requerido se recalcula cada año según lo ya instalado (hoy ≈ 9 GW/año). Pasa el ratón para ver incorporación, acumulado y ritmo requerido de cada año.</div>
       <div class="combo-wrap"><div id="chart-solar"></div><div class="combo-tip" id="chart-solar-tip"></div></div>
     </div>
     <div class="card">
       <h2>Así avanza el despliegue eólico</h2>
-      <div class="hint">Incorporación anual de potencia eólica en España (GW) y objetivo medio anual del PNIEC 2023–2030 (≈ 5,7 GW/año para pasar de 33,3 a 62 GW). Pasa el ratón para ver los GW de cada año.</div>
+      <div class="hint">Incorporación anual de potencia eólica en España (GW, REE). El PNIEC fija 62 GW acumulados en 2030: el ritmo medio requerido crece cada año que se retrasa el despliegue (hoy ≈ 5,8 GW/año). Pasa el ratón para ver incorporación, acumulado y ritmo requerido de cada año.</div>
       <div class="combo-wrap"><div id="chart-wind"></div><div class="combo-tip" id="chart-wind-tip"></div></div>
+    </div>
+    <div class="card">
+      <h2>Así avanza el despliegue de baterías</h2>
+      <div class="hint">Incorporación anual de baterías conectadas a la red de transporte (MW, APPA Renovables; 2026: solo enero) frente al ritmo que exige el PNIEC (18,5 GW en 2030). El ritmo requerido ya supera los 4.600 MW/año y crece con cada año de retraso. Las barras son casi invisibles a esta escala: eso es la asignatura pendiente.</div>
+      <div class="combo-wrap"><div id="chart-bat"></div><div class="combo-tip" id="chart-bat-tip"></div></div>
     </div>
   </section>
 
@@ -359,18 +366,32 @@
   });
 
   // ================= Zubau solar / eólica (barras con objetivo + tooltip) =================
-  function zubauChart(id, data, target, goalLabel) {
+  function zubauChart(id, data, opts) {
+    opts = opts || {};
+    const UNIT = opts.unit || "GW";
+    const COL = opts.color || "#fbbf24";
+    const NOTES = opts.notes || {};
     const el = document.getElementById(id);
     const tip = document.getElementById(id + "-tip");
-    const Y0 = 2020, Y1 = 2027;
+    const Y0 = 2023, Y1 = 2030, GOAL_YR = 2030;
+    // Objetivo acumulado del PNIEC para 2030 en las unidades del gráfico y potencia
+    // acumulada real a cierre del año anterior a Y0 (REE, informes del sistema).
+    const GOAL = opts.target2030;
+    const BASE = opts.cumBase || 0;
+    const PARTIAL = opts.partialYear || 0;   // año con dato aún incompleto: no suma al acumulado
     const W = 1000, H = 270, P = { t: 18, r: 15, b: 30, l: 44 };
-    const mx = Math.max(target, ...data.map(d => d[1])) * 1.15;
+    // Acumulado a cierre de cada año (años futuros: último acumulado conocido)
+    const cum = {}; let c = BASE;
+    for (let yr = Y0; yr <= Y1; yr++) { const v = data.find(d => d[0] === yr); if (v && yr !== PARTIAL) c += v[1]; cum[yr] = c; }
+    // El PNIEC no exige un ritmo plano: la senda se ajusta año a año y el ritmo medio
+    // requerido crece si el despliegue se retrasa. aquí: (objetivo 2030 - acumulado) / años que quedan.
+    const req = yr => Math.max(GOAL - (cum[yr] || 0), 0) / Math.max(GOAL_YR - yr, 1);
+    const mx = Math.max(req(GOAL_YR - 1), ...data.map(d => d[1])) * 1.15;
     const band = (W - P.l - P.r) / (Y1 - Y0 + 1);
     const X = yr => P.l + (yr - Y0 + 0.5) * band;
     const Y = v => P.t + (1 - v / mx) * (H - P.t - P.b);
     const bw = Math.max(band - 10, 6);
-    let g = `<line x1="${P.l}" x2="${W - P.r}" y1="${Y(target)}" y2="${Y(target)}" stroke="#f59e0b" stroke-dasharray="5 5"/>
-      <text x="${W - P.r}" y="${Y(target) - 6}" fill="#f59e0b" font-size="11" text-anchor="end">${goalLabel}</text>`;
+    let g = "";
     for (let k = 0; k <= 4; k++) {
       const v = mx * k / 4, y = Y(v);
       g += `<line x1="${P.l}" x2="${W - P.r}" y1="${y}" y2="${y}" stroke="#22304d"/>
@@ -381,21 +402,22 @@
       labels += `<text x="${X(yr)}" y="${H - 10}" fill="#8fa0b8" font-size="11" text-anchor="middle">${yr}</text>`;
       const v = data.find(d => d[0] === yr);
       if (v) {
-        bars += `<rect x="${X(yr) - bw / 2}" y="${Y(v[1])}" width="${bw}" height="${Y(0) - Y(v[1])}" rx="3" fill="#fbbf24"/>`;
-      } else {
-        // años aún sin dato real: barra de objetivo pendiente
-        bars += `<rect x="${X(yr) - bw / 2}" y="${Y(target)}" width="${bw}" height="${Y(0) - Y(target)}" rx="3" fill="none" stroke="#f59e0b" stroke-dasharray="4 3"/>`;
+        bars += `<rect x="${X(yr) - bw / 2}" y="${Y(v[1])}" width="${bw}" height="${Y(0) - Y(v[1])}" rx="3" fill="${COL}"/>`;
+      } else if (yr < GOAL_YR) {
+        // años aún sin dato real: barra discontinua con el ritmo medio pendiente desde ese año
+        bars += `<rect x="${X(yr) - bw / 2}" y="${Y(req(yr))}" width="${bw}" height="${Y(0) - Y(req(yr))}" rx="3" fill="none" stroke="#f59e0b" stroke-dasharray="4 3"/>`;
       }
     }
     el.innerHTML = `<svg id="${id}-svg" viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${g}${bars}
       <line id="${id}-xhair" x1="0" x2="0" y1="${P.t}" y2="${H - P.b}" stroke="#e6edf7" stroke-dasharray="3 3" visibility="hidden"/>
       <rect id="${id}-ov" x="${P.l}" y="${P.t}" width="${W - P.l - P.r}" height="${H - P.t - P.b}" fill="transparent"/>${labels}</svg>
-      <div class="legend"><span><span style="display:inline-block;width:10px;height:10px;background:#fbbf24;border-radius:3px;margin-right:5px"></span>incorporado</span> · <span><span style="display:inline-block;width:10px;height:10px;border:1.5px dashed #f59e0b;border-radius:3px;margin-right:5px"></span>objetivo anual PNIEC</span></div>`;
-    // Hover: GW de cada año
+      <div class="legend"><span><span style="display:inline-block;width:10px;height:10px;background:${COL};border-radius:3px;margin-right:5px"></span>incorporado</span> · <span><span style="display:inline-block;width:10px;height:10px;border:1.5px dashed #f59e0b;border-radius:3px;margin-right:5px"></span>ritmo pendiente hasta 2030 (varía cada año)</span></div>`;
+    // Hover: valor de cada año, acumulado y ritmo requerido
     const svg = document.getElementById(id + "-svg");
     const ov = document.getElementById(id + "-ov");
     const xh = document.getElementById(id + "-xhair");
     const inData = new Map(data.map(d => [d[0], d[1]]));
+    const fmt = n => n.toLocaleString("es-ES", { maximumFractionDigits: 1 });
     function move(ev) {
       const rect = svg.getBoundingClientRect();
       const px = ((ev.clientX - rect.left) / rect.width) * W;
@@ -405,13 +427,16 @@
       xh.setAttribute("x1", x); xh.setAttribute("x2", x); xh.setAttribute("visibility", "visible");
       const v = inData.get(yr);
       let rows;
-      if (v != null) {
-        rows = `<div class="tech"><span class="sw" style="background:#fbbf24"></span>incorporado<b>${v.toLocaleString("es-ES")} GW</b></div>
-                <div class="tech"><span class="sw" style="background:#334155"></span>objetivo PNIEC<b>${target.toLocaleString("es-ES")} GW</b></div>`;
+      if (yr === GOAL_YR) {
+        rows = `<div class="tech"><span class="sw" style="background:#f59e0b"></span>objetivo acumulado del PNIEC<b>${fmt(GOAL)} ${UNIT}</b></div>`;
+      } else if (v != null) {
+        rows = `<div class="tech"><span class="sw" style="background:${COL}"></span>incorporado<b>${fmt(v)} ${UNIT}</b></div>
+                <div class="tech"><span class="sw" style="background:#334155"></span>acumulado a cierre de ${yr}<b>${fmt(cum[yr])} ${UNIT}</b></div>
+                <div class="tech"><span class="sw" style="background:#f59e0b"></span>ritmo medio requerido ${yr + 1}–2030 (PNIEC)<b>${fmt(req(yr))} ${UNIT}/año</b></div>`;
       } else {
-        rows = `<div class="tech"><span class="sw" style="background:#334155"></span>objetivo medio pendiente<b>${target.toLocaleString("es-ES")} GW/año</b></div>`;
+        rows = `<div class="tech"><span class="sw" style="background:#f59e0b"></span>ritmo medio pendiente hasta 2030<b>${fmt(req(yr))} ${UNIT}/año</b></div>`;
       }
-      tip.innerHTML = `<div class="t-title">${yr}${v != null ? "" : " · objetivo"}</div>${rows}`;
+      tip.innerHTML = `<div class="t-title">${yr}${NOTES[yr] ? " · " + NOTES[yr] : ""}${yr !== GOAL_YR && v == null ? " · pendiente" : yr === GOAL_YR ? " · objetivo" : ""}</div>${rows}`;
       tip.style.display = "block";
       const wrapW = el.parentElement.clientWidth;
       const tipW = tip.offsetWidth;
@@ -427,11 +452,23 @@
     ov.addEventListener("touchmove", e => { move(e.touches[0]); e.preventDefault(); }, { passive: false });
     ov.addEventListener("touchend", out);
   }
-  // Incorporación anual en GW (REE, informes del sistema; años previos a 2024 estimados por diferencia de potencia instalada)
+  // Incorporación anual en GW (REE, informes del sistema; años previos a 2024 estimados por diferencia de potencia instalada).
+  // Acumulado a cierre de 2022 (REE + suma de incorporaciones 2020-2022): solar ≈ 17,4 GW, eólica ≈ 29,6 GW.
+  // Objetivos acumulados del PNIEC para 2030: 76,3 GW solar, 62 GW eólica, 18,5 GW baterías.
+  // El ritmo medio requerido se recalcula cada año: (objetivo 2030 - acumulado real) / años restantes.
   zubauChart("chart-solar",
-    [[2020, 2.9], [2021, 1.9], [2022, 3.9], [2023, 5.6], [2024, 6.0], [2025, 8.8]], 7, "≈ 7 GW/año (PNIEC)");
+    [[2023, 5.6], [2024, 6.0], [2025, 8.8]],
+    { color: "#fbbf24", target2030: 76.3, cumBase: 17.4 });
   zubauChart("chart-wind",
-    [[2020, 1.7], [2021, 0.8], [2022, 1.4], [2023, 0.7], [2024, 1.3], [2025, 1.2]], 5.7, "≈ 5,7 GW/año (PNIEC)");
+    [[2023, 0.7], [2024, 1.3], [2025, 1.2]],
+    { color: "#7dd3fc", target2030: 62, cumBase: 29.6 });
+  // Incorporación anual de baterías en MW conectadas a la red de transporte (informes mensuales APPA Renovables;
+  // informe del sistema REE 2025: 96 MW acumuladas a cierre de 2025; acumulado 2022: 11,8 MW).
+  // El dato de 2026 es solo enero: no suma al acumulado.
+  zubauChart("chart-bat",
+    [[2023, 9.5], [2024, 1.7], [2025, 40.9], [2026, 57.6]],
+    { unit: "MW", color: "#14b8a6", target2030: 18500, cumBase: 11.8, partialYear: 2026,
+      notes: { 2026: "solo enero (APPA)" } });
 
   // ================= Cuota combustibles (área apilada) =================
   (function carShare() {
@@ -868,7 +905,31 @@
       });
     }
     const path = ser.map((d, i) => (i ? "L" : "M") + X(i) + " " + Y(d.v)).join("");
-    el.innerHTML = `<svg id="combo-svg" viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${g}${marks}
+    // Área apilada bajo la curva con el color de cada tecnología renovable (eólica, solar, hidráulica, otras).
+    // Los tramos de cada punto se escalan para que la suma de la pila coincida exactamente con la cuota de la curva.
+    const STACK = ["eolica", "solar", "hidro", "oren"];
+    const stackCol = k => (TECHS.find(T => T.k === k) || {}).col || "#22c55e";
+    const renParts = ser.map(d => {
+      const rt = (d.t || []).filter(T => REN_KEYS.includes(T.k));
+      let sum = rt.reduce((s, T) => s + T.pct, 0);
+      if (!rt.length || !sum) return null;
+      const f = d.v / sum;   // la pila siempre cierra en la curva
+      return STACK.map(k => { const T = rt.find(x => x.k === k); return T ? T.pct * f : 0; });
+    });
+    let area = "";
+    if (renParts.every(p => p != null)) {
+      const cum = renParts.map(p => { let c = 0; return p.map(x => c += x); });
+      STACK.forEach((k, li) => {
+        let d = "";
+        ser.forEach((pt, i) => { d += (i ? "L" : "M") + X(i) + " " + Y(cum[i][li]); });
+        for (let i = ser.length - 1; i >= 0; i--) d += `L${X(i)} ${Y(li ? cum[i][li - 1] : 0)}`;
+        area += `<path d="${d}Z" fill="${stackCol(k)}" opacity="0.85"/>`;
+      });
+    } else if (ser.length > 1) {
+      // sin desglose por tecnología: área lisa en el color del territorio
+      area = `<path d="${path}L${X(ser.length - 1)} ${Y(0)}L${X(0)} ${Y(0)}Z" fill="${col}" opacity="0.22"/>`;
+    }
+    el.innerHTML = `<svg id="combo-svg" viewBox="0 0 ${W} ${H}" style="width:100%;height:auto;display:block">${g}${marks}${area}
       <path d="${path}" fill="none" stroke="${col}" stroke-width="3" stroke-linejoin="round"/>
       <circle cx="${X(ser.length - 1)}" cy="${Y(ser[ser.length - 1].v)}" r="4.5" fill="${col}"/>
       <line id="combo-xhair" x1="0" x2="0" y1="${P.t}" y2="${H - P.b}" stroke="#e6edf7" stroke-dasharray="3 3" visibility="hidden"/>
