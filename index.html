@@ -344,7 +344,7 @@
       <button id="fb-close" class="secondary">Cancelar</button>
       <button id="fb-send" class="primary">Enviar</button>
     </div>
-    <p class="foot-note">Se abrirá tu cliente de correo (maximilian.foos@volteuropa.org) con tu mensaje, la categoría y el contexto de la página (pestaña activa y estado de los datos) ya rellenados. Solo tienes que pulsar enviar.</p>
+    <p class="foot-note">Se abrirá un asunto en GitHub (mxfs19/energie-monitor) con tu mensaje y el contexto de la página (pestaña activa y estado de los datos) ya rellenados. Requiere cuenta de GitHub; el texto no se guarda en ningún servidor.</p>
   </div>
 </div>
 
@@ -1109,7 +1109,7 @@
   load();
   // ================= Botón de feedback (ideas / datos erróneos u obsoletos) =================
   // Sin backend: compone un correo al autor con el mensaje y el contexto de la página.
-  const FB_MAIL = "maximilian.foos@volteuropa.org";
+  const FB_REPO = "https://github.com/mxfs19/energie-monitor/issues/new";
   (function feedback() {
     const btn = document.getElementById("fb-btn");
     const modal = document.getElementById("fb-modal");
@@ -1123,9 +1123,9 @@
       const cat = (document.querySelector('input[name="fb-cat"]:checked') || {}).value || "idea";
       const txt = (document.getElementById("fb-text").value || "").trim();
       const labels = { idea: "Idea", wrong: "Dato erróneo", stale: "Dato obsoleto" };
-      const subject = `[Monitor Energético] ${labels[cat]}${txt ? ": " + txt.slice(0, 60) + (txt.length > 60 ? "…" : "") : ""}`;
+      const title = `[Feedback] ${labels[cat]}${txt ? ": " + txt.slice(0, 60) + (txt.length > 60 ? "…" : "") : ""}`;
       const body = `Categoría: ${labels[cat]}\n\nMensaje:\n${txt || "(sin texto)"}\n\n--- contexto automático ---\nPágina: ${location.href}\nPestaña: ${pageGeo === "cat" ? "Catalunya" : "España"}\nEstado de datos: ${document.getElementById("status-text").textContent}\nNavegador: ${navigator.userAgent}\n`;
-      location.href = `mailto:${FB_MAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      window.open(`${FB_REPO}?title=${encodeURIComponent(title)}&body=${encodeURIComponent(body)}`, "_blank");
       close();
     };
   })();
