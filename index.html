@@ -91,6 +91,31 @@
     cursor: pointer; font-family: inherit;
   }
   .geo-tabs button.active { background: #16a34a; color: #fff; border-color: #16a34a; }
+  .fb-btn {
+    background: var(--card2); color: var(--muted); border: 1px solid var(--line);
+    border-radius: 8px; padding: 6px 12px; font-size: .8rem; cursor: pointer; font-family: inherit;
+    margin-left: auto; white-space: nowrap;
+  }
+  .fb-btn:hover { color: var(--text); border-color: #38bdf8; }
+  .fb-modal { position: fixed; inset: 0; background: rgba(4,8,16,.7); display: none; align-items: center; justify-content: center; z-index: 50; padding: 16px; }
+  .fb-modal .panel { background: var(--card); border: 1px solid var(--line); border-radius: 14px; padding: 20px; width: min(480px, 100%); }
+  .fb-modal h3 { font-size: 1rem; margin-bottom: 10px; }
+  .fb-modal .cats { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 10px; }
+  .fb-modal .cats label {
+    background: var(--card2); border: 1px solid var(--line); border-radius: 8px;
+    padding: 6px 10px; font-size: .8rem; cursor: pointer; color: var(--muted);
+  }
+  .fb-modal .cats input { display: none; }
+  .fb-modal .cats label:has(input:checked) { background: #16a34a; border-color: #16a34a; color: #fff; font-weight: 600; }
+  .fb-modal textarea {
+    width: 100%; height: 110px; background: var(--card2); color: var(--text);
+    border: 1px solid var(--line); border-radius: 8px; padding: 10px; font-family: inherit; font-size: .85rem;
+    resize: vertical; margin-bottom: 10px;
+  }
+  .fb-modal .row { display: flex; gap: 10px; justify-content: flex-end; }
+  .fb-modal button.primary { background: #16a34a; color: #fff; border: none; border-radius: 8px; padding: 8px 16px; font-weight: 600; cursor: pointer; font-family: inherit; font-size: .85rem; }
+  .fb-modal button.secondary { background: var(--card2); color: var(--muted); border: 1px solid var(--line); border-radius: 8px; padding: 8px 16px; cursor: pointer; font-family: inherit; font-size: .85rem; }
+  .fb-modal .foot-note { margin-top: 10px; }
   .combo-tip { max-width: 320px; }
   .combo-tip .tech { display: grid; grid-template-columns: 12px 1fr auto; gap: 6px; align-items: center; margin: 2px 0; color: var(--muted); }
   .combo-tip .tech b { color: var(--text); font-weight: 600; }
@@ -104,6 +129,7 @@
   <div class="geo-tabs">
     <button id="geo-es" class="active"><svg viewBox="0 0 18 12" style="width:18px;height:12px;border-radius:2px;vertical-align:-1px;margin-right:2px"><rect width="18" height="3" fill="#aa151b"/><rect y="3" width="18" height="6" fill="#f1bf00"/><rect y="9" width="18" height="3" fill="#aa151b"/></svg> España</button>
     <button id="geo-cat"><svg viewBox="0 0 18 12" style="width:18px;height:12px;border-radius:2px;vertical-align:-1px;margin-right:2px"><rect width="18" height="12" fill="#fcdd09"/><rect y="1.33" width="18" height="1.33" fill="#da121a"/><rect y="4" width="18" height="1.33" fill="#da121a"/><rect y="6.67" width="18" height="1.33" fill="#da121a"/><rect y="9.33" width="18" height="1.33" fill="#da121a"/></svg> Catalunya</button>
+    <button id="fb-btn" title="Comparte una idea o avisa de datos erróneos u obsoletos">💡 Feedback</button>
   </div>
 </header>
 
@@ -304,6 +330,23 @@
     <p class="foot-note">España, cuota de enchufables (BEV+PHEV) en turismos nuevos, elaborada a partir de los informes mensuales de matriculaciones por fuente de energía de ANFAC/Ideauto (datos DGT): media anual 2020: 4,8 %; serie mensual desde feb 2021. Enero, marzo y mayo de 2021 no se publicaron en ese formato: su tramo se dibuja discontinuo y el puntero solo se detiene en meses publicados. Hitos recientes: agosto 2026: 27,7 %, septiembre: 34,0 % (máximo), octubre: 31,5 %. Medias anuales publicadas como referencia: 7,8 % (2021), 9,7 % (2022), 12,0 % (2023), 11,4 % (2024), 19,6 % (2025). La senda necesaria (≈ +8 pp/año) llevaría al 100 % en 2035; el PHEV también desaparecerá como venta nueva. No existe una serie mensual homóloga publicada para Catalunya, por lo que la tarjeta se muestra solo en la pestaña de España.</p>
   </section>
 </main>
+
+<div id="fb-modal" class="fb-modal">
+  <div class="panel">
+    <h3>Feedback 💡</h3>
+    <div class="cats">
+      <label><input type="radio" name="fb-cat" value="idea" checked>Compartir una idea</label>
+      <label><input type="radio" name="fb-cat" value="wrong">El dato es erróneo</label>
+      <label><input type="radio" name="fb-cat" value="stale">El dato está obsoleto</label>
+    </div>
+    <textarea id="fb-text" placeholder="¿Qué gráfica o cifra? Si es un error, ¿qué valor crees que es el correcto?"></textarea>
+    <div class="row">
+      <button id="fb-close" class="secondary">Cancelar</button>
+      <button id="fb-send" class="primary">Enviar</button>
+    </div>
+    <p class="foot-note">Se abrirá tu cliente de correo (maximilian.foos@volteuropa.org) con tu mensaje, la categoría y el contexto de la página (pestaña activa y estado de los datos) ya rellenados. Solo tienes que pulsar enviar.</p>
+  </div>
+</div>
 
 <footer>
   <p><strong>Fuentes:</strong> Red Eléctrica de España, API abierta <a href="https://www.ree.es/es/datos/apidatos">apidatos.ree.es</a> (balance eléctrico España y CCAA Catalunya, con corte al día de ayer); <a href="https://www.sistemaelectrico-ree.es/es/informe-del-sistema-electrico/potencia-instalada">REE, Informe del Sistema Eléctrico 2024 y 2025</a> (incorporación anual de potencia); <a href="https://www.miteco.gob.es/content/dam/miteco/es/energia/files-1/pniec-2023-2030/PNIEC_2024_240924.pdf">PNIEC 2023–2030 (MITECO)</a>; <a href="https://govern.cat/gov/notes-premsa/515283/government-approves-roadmap-for-catalonia-s-energy-transition-until-2050">PROENCAT 2050</a> y PLATER (Catalunya); <a href="https://anfac.com/matriculaciones-vehiculos-electrificados/">ANFAC</a> y ACEA (vehículos). Objetivos España 2030: 76,3 GW fotovoltaica, 62 GW eólica, 22,5 GW almacenamiento y 81 % de generación renovable. Objetivos Catalunya 2030: 12.000 MW renovables y 54 % de demanda renovable (62.000 MW en 2050, PLATER).</p>
@@ -1064,6 +1107,29 @@
   }
   setGeo("es");
   load();
+  // ================= Botón de feedback (ideas / datos erróneos u obsoletos) =================
+  // Sin backend: compone un correo al autor con el mensaje y el contexto de la página.
+  const FB_MAIL = "maximilian.foos@volteuropa.org";
+  (function feedback() {
+    const btn = document.getElementById("fb-btn");
+    const modal = document.getElementById("fb-modal");
+    if (!btn || !modal) return;
+    const close = () => { modal.style.display = "none"; };
+    btn.onclick = () => { modal.style.display = "flex"; document.getElementById("fb-text").focus(); };
+    document.getElementById("fb-close").onclick = close;
+    modal.addEventListener("click", e => { if (e.target === modal) close(); });
+    document.addEventListener("keydown", e => { if (e.key === "Escape" && modal.style.display === "flex") close(); });
+    document.getElementById("fb-send").onclick = () => {
+      const cat = (document.querySelector('input[name="fb-cat"]:checked') || {}).value || "idea";
+      const txt = (document.getElementById("fb-text").value || "").trim();
+      const labels = { idea: "Idea", wrong: "Dato erróneo", stale: "Dato obsoleto" };
+      const subject = `[Monitor Energético] ${labels[cat]}${txt ? ": " + txt.slice(0, 60) + (txt.length > 60 ? "…" : "") : ""}`;
+      const body = `Categoría: ${labels[cat]}\n\nMensaje:\n${txt || "(sin texto)"}\n\n--- contexto automático ---\nPágina: ${location.href}\nPestaña: ${pageGeo === "cat" ? "Catalunya" : "España"}\nEstado de datos: ${document.getElementById("status-text").textContent}\nNavegador: ${navigator.userAgent}\n`;
+      location.href = `mailto:${FB_MAIL}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+      close();
+    };
+  })();
+
   setInterval(load, 15 * 60 * 1000);
 })();
 </script>
